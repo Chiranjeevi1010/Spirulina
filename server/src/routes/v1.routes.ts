@@ -1,0 +1,42 @@
+import { Router } from 'express';
+import authRoutes from '../modules/auth/auth.routes.js';
+import userRoutes from '../modules/users/users.routes.js';
+import pondRoutes from '../modules/ponds/ponds.routes.js';
+import waterParameterRoutes from '../modules/water-parameters/water-parameters.routes.js';
+import harvestRoutes from '../modules/harvest/harvest.routes.js';
+import productionRoutes from '../modules/production/production.routes.js';
+import chemicalRoutes from '../modules/chemicals/chemicals.routes.js';
+import expenseRoutes from '../modules/expenses/expenses.routes.js';
+import customerRoutes from '../modules/customers/customers.routes.js';
+import leadRoutes from '../modules/leads/leads.routes.js';
+import orderRoutes from '../modules/orders/orders.routes.js';
+import inventoryRoutes from '../modules/inventory/inventory.routes.js';
+import batchRoutes from '../modules/batches/batches.routes.js';
+import marketingRoutes from '../modules/marketing/marketing.routes.js';
+import aiRoutes from '../modules/ai/ai.routes.js';
+import reportRoutes from '../modules/reports/reports.routes.js';
+import dashboardRoutes from '../modules/dashboard/dashboard.routes.js';
+import settingRoutes from '../modules/settings/settings.routes.js';
+
+const router = Router();
+
+router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
+router.use('/ponds', pondRoutes);
+router.use('/water-parameters', waterParameterRoutes);
+router.use('/harvest', harvestRoutes);
+router.use('/production', productionRoutes);
+router.use('/chemicals', chemicalRoutes);
+router.use('/expenses', expenseRoutes);
+router.use('/customers', customerRoutes);
+router.use('/leads', leadRoutes);
+router.use('/orders', orderRoutes);
+router.use('/inventory', inventoryRoutes);
+router.use('/batches', batchRoutes);
+router.use('/marketing', marketingRoutes);
+router.use('/ai', aiRoutes);
+router.use('/reports', reportRoutes);
+router.use('/dashboard', dashboardRoutes);
+router.use('/settings', settingRoutes);
+
+export default router;

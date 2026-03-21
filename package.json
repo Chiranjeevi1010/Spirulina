@@ -1,0 +1,35 @@
+{
+  "name": "spirulina-erp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Spirulina Cultivation ERP + AI Decision Engine + Sales CRM",
+  "scripts": {
+    "dev": "pnpm --parallel --filter ./server --filter ./client dev",
+    "dev:server": "pnpm --filter server dev",
+    "dev:client": "pnpm --filter client dev",
+    "build": "pnpm --filter @spirulina/shared build && pnpm --parallel --filter ./server --filter ./client build",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write .",
+    "start": "start start.bat",
+    "stop": "start stop.bat",
+    "db:start": "tsx scripts/start-db.ts",
+    "db:migrate": "pnpm --filter server db:migrate",
+    "db:seed": "pnpm --filter server db:seed",
+    "db:generate": "pnpm --filter server db:generate",
+    "clean": "pnpm -r clean"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "@embedded-postgres/windows-x64"
+    ]
+  },
+  "devDependencies": {
+    "embedded-postgres": "18.2.0-beta.16",
+    "tsx": "^4.19.0"
+  }
+}

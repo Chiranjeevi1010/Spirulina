@@ -1,0 +1,11 @@
+node_modules
+data
+.claude
+*.bat
+nul
+.env
+server/.env
+client/dist
+server/dist
+.git
+docker
