@@ -22,3 +22,4 @@ export { testimonials } from './testimonials.schema';
 export { aiConversations } from './ai-conversations.schema';
 export { aiAlerts } from './ai-alerts.schema';
 export { settings } from './settings.schema';
+export { whatsappLogs } from './whatsapp-logs.schema';

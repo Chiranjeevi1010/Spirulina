@@ -17,6 +17,7 @@ import aiRoutes from '../modules/ai/ai.routes.js';
 import reportRoutes from '../modules/reports/reports.routes.js';
 import dashboardRoutes from '../modules/dashboard/dashboard.routes.js';
 import settingRoutes from '../modules/settings/settings.routes.js';
+import whatsappRoutes from '../modules/whatsapp/whatsapp.routes.js';
 
 const router = Router();
 
@@ -38,5 +39,6 @@ router.use('/ai', aiRoutes);
 router.use('/reports', reportRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/settings', settingRoutes);
+router.use('/whatsapp', whatsappRoutes);
 
 export default router;

@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { ArrowLeft, IndianRupee, Package, Calendar, User } from 'lucide-react';
 import { Button, Input, Card, CardBody, CardTitle, DataTable, Modal, Select, PageLoader, Badge } from '../components/ui';
-import { ordersApi } from '../services/modules.api';
+import { ordersApi, whatsappApi } from '../services/modules.api';
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -17,6 +17,12 @@ export default function OrderDetailPage() {
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', orderId],
     queryFn: () => ordersApi.getById(orderId),
+    enabled: !!orderId,
+  });
+
+  const { data: waLogs } = useQuery({
+    queryKey: ['whatsapp-log-order', orderId],
+    queryFn: () => whatsappApi.getLogByOrder(orderId),
     enabled: !!orderId,
   });
 
@@ -167,6 +173,43 @@ export default function OrderDetailPage() {
           </div>
         </CardBody>
       </Card>
+
+      {/* WhatsApp Notification History */}
+      {waLogs && (waLogs as any[]).length > 0 && (
+        <Card className="mt-6">
+          <CardBody>
+            <CardTitle>WhatsApp Notifications</CardTitle>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-gray-500">
+                    <th className="pb-2 pr-4">Type</th>
+                    <th className="pb-2 pr-4">Phone</th>
+                    <th className="pb-2 pr-4">Status</th>
+                    <th className="pb-2">Sent At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(waLogs as any[]).map((log: any) => (
+                    <tr key={log.id} className="border-b border-gray-100">
+                      <td className="py-2 pr-4">
+                        <Badge variant={log.status === 'failed' ? 'danger' : 'success'}>
+                          {log.messageType?.replace(/_/g, ' ')}
+                        </Badge>
+                      </td>
+                      <td className="py-2 pr-4 font-mono text-xs">{log.phoneNumber}</td>
+                      <td className="py-2 pr-4">
+                        <Badge variant={log.status === 'failed' ? 'danger' : 'success'}>{log.status}</Badge>
+                      </td>
+                      <td className="py-2 text-gray-500">{new Date(log.createdAt).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
       {/* Payment Modal */}
       <Modal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} title="Record Payment">

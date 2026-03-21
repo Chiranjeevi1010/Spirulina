@@ -2,6 +2,7 @@ import { eq, and, sql, desc, gte, lte, between, ne } from 'drizzle-orm';
 import { db } from '../../config/database.config.js';
 import { orders, orderItems, customers } from '../../db/schema/index.js';
 import { AppError } from '../../middleware/error-handler.middleware.js';
+import { WhatsAppService } from '../whatsapp/whatsapp.service.js';
 
 export class OrdersService {
   private async generateOrderNumber(): Promise<string> {
@@ -159,6 +160,10 @@ export class OrdersService {
 
     const items = await db.insert(orderItems).values(itemValues).returning();
 
+    // Fire-and-forget WhatsApp notification
+    new WhatsAppService().sendOrderConfirmation(order.id).catch(err =>
+      console.error('WhatsApp order confirmation failed:', err.message));
+
     return { ...order, items };
   }
 
@@ -183,6 +188,15 @@ export class OrdersService {
       updatedAt: new Date(),
     }).where(eq(orders.id, id)).returning();
     if (!order) throw new AppError('Order not found', 404);
+
+    // Fire-and-forget WhatsApp notifications for status changes
+    const wa = new WhatsAppService();
+    if (status === 'shipped') {
+      wa.sendOrderShipped(id).catch(err => console.error('WhatsApp shipped notification failed:', err.message));
+    } else if (status === 'delivered') {
+      wa.sendOrderDelivered(id).catch(err => console.error('WhatsApp delivered notification failed:', err.message));
+    }
+
     return order;
   }
 
@@ -200,6 +214,12 @@ export class OrdersService {
       paymentStatus,
       updatedAt: new Date(),
     }).where(eq(orders.id, id)).returning();
+
+    // Fire-and-forget WhatsApp payment notification
+    if (totalReceived > 0) {
+      new WhatsAppService().sendPaymentReceived(id, totalReceived).catch(err =>
+        console.error('WhatsApp payment notification failed:', err.message));
+    }
 
     return updated;
   }

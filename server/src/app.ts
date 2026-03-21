@@ -8,6 +8,8 @@ import { fileURLToPath } from 'url';
 import { env } from './config/env.config.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.middleware.js';
 import v1Routes from './routes/v1.routes.js';
+import cron from 'node-cron';
+import { WhatsAppService } from './modules/whatsapp/whatsapp.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,6 +62,17 @@ app.use(errorHandler);
 app.listen(env.port, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${env.port}`);
   console.log(`Environment: ${env.nodeEnv}`);
+
+  // Daily payment reminder cron job at 9 AM
+  cron.schedule('0 9 * * *', async () => {
+    try {
+      const whatsappService = new WhatsAppService();
+      await whatsappService.processPaymentReminders();
+      console.log('Payment reminders processed');
+    } catch (err) {
+      console.error('Payment reminder cron failed:', err);
+    }
+  });
 });
 
 export default app;

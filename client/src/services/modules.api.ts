@@ -273,6 +273,30 @@ export const marketingApi = {
   },
 };
 
+// WhatsApp API
+export const whatsappApi = {
+  getConfig: async () => {
+    const res = await api.get<ApiResponse<Record<string, unknown>>>('/whatsapp/config');
+    return res.data.data;
+  },
+  updateConfig: async (data: Record<string, unknown>) => {
+    const res = await api.put<ApiResponse<unknown>>('/whatsapp/config', data);
+    return res.data;
+  },
+  getLog: async (params?: Record<string, unknown>) => {
+    const res = await api.get<PaginatedResponse<unknown>>('/whatsapp/log', { params });
+    return res.data;
+  },
+  getLogByOrder: async (orderId: number) => {
+    const res = await api.get<ApiResponse<unknown[]>>(`/whatsapp/log/order/${orderId}`);
+    return res.data.data;
+  },
+  sendTest: async (phone: string) => {
+    const res = await api.post<ApiResponse<{ success: boolean; messageId?: string; error?: string }>>('/whatsapp/test', { phone });
+    return res.data.data;
+  },
+};
+
 // Users API
 export const usersApi = {
   list: async (params?: Record<string, unknown>) => {
