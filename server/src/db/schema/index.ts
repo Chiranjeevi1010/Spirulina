@@ -23,3 +23,7 @@ export { aiConversations } from './ai-conversations.schema';
 export { aiAlerts } from './ai-alerts.schema';
 export { settings } from './settings.schema';
 export { whatsappLogs } from './whatsapp-logs.schema';
+export { extractedLeads } from './extracted-leads.schema';
+export { emailTemplates } from './email-templates.schema';
+export { emailLogs } from './email-logs.schema';
+export { callLogs } from './call-logs.schema';

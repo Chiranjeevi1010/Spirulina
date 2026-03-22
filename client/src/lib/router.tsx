@@ -24,6 +24,10 @@ import AIAssistantPage from '../pages/AIAssistantPage';
 import ReportsPage from '../pages/ReportsPage';
 import SettingsPage from '../pages/SettingsPage';
 import UserManagementPage from '../pages/UserManagementPage';
+import CrmDashboardPage from '../pages/CrmDashboardPage';
+import ExtractedLeadsPage from '../pages/ExtractedLeadsPage';
+import EmailPage from '../pages/EmailPage';
+import CallTrackerPage from '../pages/CallTrackerPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 const router = createBrowserRouter([
@@ -47,6 +51,10 @@ const router = createBrowserRouter([
           { path: '/customers', element: <CustomersPage /> },
           { path: '/customers/:id', element: <CustomerDetailPage /> },
           { path: '/leads', element: <LeadsPage /> },
+          { path: '/crm', element: <CrmDashboardPage /> },
+          { path: '/crm/extracted-leads', element: <ExtractedLeadsPage /> },
+          { path: '/crm/email', element: <EmailPage /> },
+          { path: '/crm/call-tracker', element: <CallTrackerPage /> },
           { path: '/orders', element: <OrdersPage /> },
           { path: '/orders/:id', element: <OrderDetailPage /> },
           { path: '/inventory', element: <InventoryPage /> },

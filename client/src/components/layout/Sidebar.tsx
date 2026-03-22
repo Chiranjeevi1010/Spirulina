@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Waves, Droplets, Scissors, Factory,
   FlaskConical, Calculator, Receipt, Users, UserPlus,
   ShoppingCart, Package, Boxes, Landmark, MessageSquareQuote,
-  Bot, BarChart3, Settings, X,
+  Bot, BarChart3, Settings, X, Target, Search, Mail, Phone,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
 import { useUIStore } from '../../store/ui.store';
@@ -58,8 +58,12 @@ const navSections: NavSection[] = [
   {
     title: 'Sales & CRM',
     items: [
+      { label: 'CRM Dashboard', path: '/crm', icon: <Target size={20} />, resource: 'leads' },
       { label: 'Customers', path: '/customers', icon: <Users size={20} />, resource: 'customers' },
       { label: 'Leads', path: '/leads', icon: <UserPlus size={20} />, resource: 'leads' },
+      { label: 'Extracted Leads', path: '/crm/extracted-leads', icon: <Search size={20} />, resource: 'leads' },
+      { label: 'Email Outreach', path: '/crm/email', icon: <Mail size={20} />, resource: 'leads' },
+      { label: 'Call Tracker', path: '/crm/call-tracker', icon: <Phone size={20} />, resource: 'leads' },
       { label: 'Orders', path: '/orders', icon: <ShoppingCart size={20} />, resource: 'orders' },
     ],
   },

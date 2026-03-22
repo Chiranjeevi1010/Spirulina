@@ -297,6 +297,122 @@ export const whatsappApi = {
   },
 };
 
+// Extracted Leads API
+export const extractedLeadsApi = {
+  list: async (params?: Record<string, unknown>) => {
+    const res = await api.get<PaginatedResponse<unknown>>('/extracted-leads', { params });
+    return res.data;
+  },
+  getById: async (id: number) => {
+    const res = await api.get<ApiResponse<unknown>>(`/extracted-leads/${id}`);
+    return res.data.data;
+  },
+  review: async (id: number, data: { status: string; notes?: string }) => {
+    const res = await api.patch<ApiResponse<unknown>>(`/extracted-leads/${id}/review`, data);
+    return res.data.data;
+  },
+  bulkReview: async (data: { ids: number[]; status: string }) => {
+    const res = await api.post<ApiResponse<unknown>>('/extracted-leads/bulk-review', data);
+    return res.data.data;
+  },
+  getStats: async () => {
+    const res = await api.get<ApiResponse<unknown>>('/extracted-leads/stats');
+    return res.data.data;
+  },
+  getHistory: async () => {
+    const res = await api.get<ApiResponse<unknown[]>>('/extracted-leads/history');
+    return res.data.data;
+  },
+  trigger: async () => {
+    const res = await api.post<ApiResponse<{ count: number }>>('/extracted-leads/trigger');
+    return res.data.data;
+  },
+};
+
+// Email API
+export const emailApi = {
+  send: async (data: Record<string, unknown>) => {
+    const res = await api.post<ApiResponse<unknown>>('/email/send', data);
+    return res.data.data;
+  },
+  bulkSend: async (data: { leadIds: number[]; templateId: number }) => {
+    const res = await api.post<ApiResponse<unknown>>('/email/bulk-send', data);
+    return res.data.data;
+  },
+  getLog: async (params?: Record<string, unknown>) => {
+    const res = await api.get<PaginatedResponse<unknown>>('/email/log', { params });
+    return res.data;
+  },
+  getStats: async () => {
+    const res = await api.get<ApiResponse<unknown>>('/email/stats');
+    return res.data.data;
+  },
+  getConfig: async () => {
+    const res = await api.get<ApiResponse<unknown>>('/email/config');
+    return res.data.data;
+  },
+  updateConfig: async (data: Record<string, unknown>) => {
+    const res = await api.put<ApiResponse<unknown>>('/email/config', data);
+    return res.data;
+  },
+  testConnection: async () => {
+    const res = await api.post<ApiResponse<{ success: boolean; error?: string }>>('/email/test-connection');
+    return res.data.data;
+  },
+  listTemplates: async () => {
+    const res = await api.get<ApiResponse<unknown[]>>('/email/templates');
+    return res.data.data;
+  },
+  getTemplate: async (id: number) => {
+    const res = await api.get<ApiResponse<unknown>>(`/email/templates/${id}`);
+    return res.data.data;
+  },
+  createTemplate: async (data: Record<string, unknown>) => {
+    const res = await api.post<ApiResponse<unknown>>('/email/templates', data);
+    return res.data.data;
+  },
+  updateTemplate: async (id: number, data: Record<string, unknown>) => {
+    const res = await api.put<ApiResponse<unknown>>(`/email/templates/${id}`, data);
+    return res.data.data;
+  },
+  deleteTemplate: async (id: number): Promise<void> => {
+    await api.delete(`/email/templates/${id}`);
+  },
+};
+
+// Call Tracker API
+export const callTrackerApi = {
+  ...createCrudApi('/call-tracker'),
+  getStats: async (params?: Record<string, unknown>) => {
+    const res = await api.get<ApiResponse<unknown>>('/call-tracker/stats', { params });
+    return res.data.data;
+  },
+  getDailyTarget: async () => {
+    const res = await api.get<ApiResponse<unknown>>('/call-tracker/daily-target');
+    return res.data.data;
+  },
+  getFollowUps: async (params?: Record<string, unknown>) => {
+    const res = await api.get<ApiResponse<unknown[]>>('/call-tracker/follow-ups', { params });
+    return res.data.data;
+  },
+  getAnalytics: async (params?: Record<string, unknown>) => {
+    const res = await api.get<ApiResponse<unknown>>('/call-tracker/analytics', { params });
+    return res.data.data;
+  },
+  completeFollowUp: async (id: number) => {
+    const res = await api.patch<ApiResponse<unknown>>(`/call-tracker/${id}/complete-follow-up`);
+    return res.data.data;
+  },
+};
+
+// CRM Dashboard API
+export const crmDashboardApi = {
+  getSummary: async () => {
+    const res = await api.get<ApiResponse<unknown>>('/crm-dashboard/summary');
+    return res.data.data;
+  },
+};
+
 // Users API
 export const usersApi = {
   list: async (params?: Record<string, unknown>) => {

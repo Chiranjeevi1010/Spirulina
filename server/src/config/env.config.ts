@@ -12,6 +12,7 @@ export const env = {
   openaiApiKey: process.env.OPENAI_API_KEY || '',
   defaultAiProvider: (process.env.DEFAULT_AI_PROVIDER || 'claude') as 'claude' | 'openai',
   defaultAiModel: process.env.DEFAULT_AI_MODEL || 'claude-sonnet-4-20250514',
+  googlePlacesApiKey: process.env.GOOGLE_PLACES_API_KEY || '',
   isDev: process.env.NODE_ENV !== 'production',
   isProd: process.env.NODE_ENV === 'production',
 } as const;

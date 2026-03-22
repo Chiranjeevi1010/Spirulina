@@ -18,6 +18,10 @@ import reportRoutes from '../modules/reports/reports.routes.js';
 import dashboardRoutes from '../modules/dashboard/dashboard.routes.js';
 import settingRoutes from '../modules/settings/settings.routes.js';
 import whatsappRoutes from '../modules/whatsapp/whatsapp.routes.js';
+import leadExtractionRoutes from '../modules/lead-extraction/lead-extraction.routes.js';
+import emailRoutes from '../modules/email/email.routes.js';
+import callTrackerRoutes from '../modules/call-tracker/call-tracker.routes.js';
+import crmDashboardRoutes from '../modules/crm-dashboard/crm-dashboard.routes.js';
 
 const router = Router();
 
@@ -40,5 +44,9 @@ router.use('/reports', reportRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/settings', settingRoutes);
 router.use('/whatsapp', whatsappRoutes);
+router.use('/extracted-leads', leadExtractionRoutes);
+router.use('/email', emailRoutes);
+router.use('/call-tracker', callTrackerRoutes);
+router.use('/crm-dashboard', crmDashboardRoutes);
 
 export default router;

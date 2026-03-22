@@ -73,6 +73,30 @@ app.listen(env.port, '0.0.0.0', () => {
       console.error('Payment reminder cron failed:', err);
     }
   });
+
+  // Lead extraction cron - daily at 6 AM
+  cron.schedule('0 6 * * *', async () => {
+    try {
+      const { LeadExtractionService } = await import('./modules/lead-extraction/lead-extraction.service.js');
+      const service = new LeadExtractionService();
+      const count = await service.extractLeads();
+      console.log(`Lead extraction completed: ${count} new leads`);
+    } catch (err) {
+      console.error('Lead extraction cron failed:', err);
+    }
+  });
+
+  // Follow-up reminder cron - daily at 8:30 AM
+  cron.schedule('30 8 * * *', async () => {
+    try {
+      const { CallTrackerService } = await import('./modules/call-tracker/call-tracker.service.js');
+      const service = new CallTrackerService();
+      const followUps = await service.getPendingFollowUps();
+      console.log(`Pending follow-ups today: ${followUps.length}`);
+    } catch (err) {
+      console.error('Follow-up reminder cron failed:', err);
+    }
+  });
 });
 
 export default app;
