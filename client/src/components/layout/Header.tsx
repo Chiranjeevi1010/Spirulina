@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, PanelLeftClose, PanelLeft, Bell, LogOut, User, ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Menu, PanelLeftClose, PanelLeft, Bell, LogOut, User, ChevronDown, Globe } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
 import { useUIStore } from '../../store/ui.store';
 import { useAuth } from '../../hooks/useAuth';
@@ -8,7 +9,8 @@ import { useAuth } from '../../hooks/useAuth';
 export function Header() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
-  const { toggleSidebar, toggleSidebarCollapse, sidebarCollapsed } = useUIStore();
+  const { t } = useTranslation();
+  const { toggleSidebar, toggleSidebarCollapse, sidebarCollapsed, language, setLanguage } = useUIStore();
   const { logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -40,6 +42,19 @@ export function Header() {
 
       {/* Right */}
       <div className="flex items-center gap-3">
+        {/* Language switcher */}
+        <div className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100">
+          <Globe size={16} className="text-gray-500" />
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="text-xs font-medium text-gray-600 bg-transparent border-none outline-none cursor-pointer"
+          >
+            <option value="en">EN</option>
+            <option value="te">తె</option>
+          </select>
+        </div>
+
         {/* Notifications */}
         <button className="p-2 rounded-md hover:bg-gray-100 relative">
           <Bell size={20} className="text-gray-500" />
@@ -79,13 +94,13 @@ export function Header() {
                     onClick={() => { setDropdownOpen(false); navigate('/settings'); }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                   >
-                    <User size={16} /> Profile
+                    <User size={16} /> {t('header.profile')}
                   </button>
                   <button
                     onClick={() => { setDropdownOpen(false); handleLogout(); }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
-                    <LogOut size={16} /> Sign out
+                    <LogOut size={16} /> {t('header.signOut')}
                   </button>
                 </div>
               </div>

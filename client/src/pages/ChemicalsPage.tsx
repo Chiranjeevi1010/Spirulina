@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Plus, FlaskConical, ClipboardList, Pencil, Trash2, RefreshCw } from 'lucide-react';
@@ -37,6 +38,7 @@ const DEFAULT_MINERALS = [
 ];
 
 export default function ChemicalsPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [chemPage, setChemPage] = useState(1);
   const [usagePage, setUsagePage] = useState(1);
@@ -80,44 +82,44 @@ export default function ChemicalsPage() {
   const createChemMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => chemicalsApi.create(data),
     onSuccess: () => {
-      toast.success('Chemical added');
+      toast.success(t('chemicals.chemicalAdded'));
       queryClient.invalidateQueries({ queryKey: ['chemicals'] });
       setShowChemModal(false);
       resetChemForm();
     },
-    onError: () => toast.error('Failed to add chemical'),
+    onError: () => toast.error(t('chemicals.chemicalAddFailed')),
   });
 
   const updateChemMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => chemicalsApi.update(id, data),
     onSuccess: () => {
-      toast.success('Chemical updated');
+      toast.success(t('chemicals.chemicalUpdated'));
       queryClient.invalidateQueries({ queryKey: ['chemicals'] });
       setShowChemModal(false);
       resetChemForm();
     },
-    onError: () => toast.error('Failed to update chemical'),
+    onError: () => toast.error(t('chemicals.chemicalUpdateFailed')),
   });
 
   const deleteChemMutation = useMutation({
     mutationFn: (id: number) => chemicalsApi.delete(id),
     onSuccess: () => {
-      toast.success('Chemical deleted');
+      toast.success(t('chemicals.chemicalDeleted'));
       queryClient.invalidateQueries({ queryKey: ['chemicals'] });
     },
-    onError: () => toast.error('Failed to delete chemical'),
+    onError: () => toast.error(t('chemicals.chemicalDeleteFailed')),
   });
 
   const logUsageMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => chemicalsApi.logUsage(data),
     onSuccess: () => {
-      toast.success('Usage logged');
+      toast.success(t('chemicals.usageLogged'));
       queryClient.invalidateQueries({ queryKey: ['chemicals-usage'] });
       queryClient.invalidateQueries({ queryKey: ['chemicals'] });
       setShowUsageModal(false);
       resetUsageForm();
     },
-    onError: () => toast.error('Failed to log usage'),
+    onError: () => toast.error(t('chemicals.usageLogFailed')),
   });
 
   const loadDefaultsMutation = useMutation({
@@ -127,10 +129,10 @@ export default function ChemicalsPage() {
       }
     },
     onSuccess: () => {
-      toast.success('Default minerals loaded successfully');
+      toast.success(t('chemicals.defaultMineralsLoaded'));
       queryClient.invalidateQueries({ queryKey: ['chemicals'] });
     },
-    onError: () => toast.error('Failed to load default minerals'),
+    onError: () => toast.error(t('chemicals.defaultMineralsFailed')),
   });
 
   const resetChemForm = () => {
@@ -193,43 +195,43 @@ export default function ChemicalsPage() {
   const chemOptions = chemList.map((c: any) => ({ value: String(c.id), label: c.name }));
 
   const chemColumns = [
-    { key: 'name', header: 'Name' },
-    { key: 'category', header: 'Category', render: (item: any) => <span className="capitalize">{item.category}</span> },
-    { key: 'unit', header: 'Unit' },
+    { key: 'name', header: t('common.name') },
+    { key: 'category', header: t('common.category'), render: (item: any) => <span className="capitalize">{item.category}</span> },
+    { key: 'unit', header: t('chemicals.unit') },
     {
       key: 'currentStock',
-      header: 'Current Stock',
+      header: t('chemicals.currentStock'),
       render: (item: any) => {
         const isLow = Number(item.currentStock) <= Number(item.minimumStock);
         return (
           <span className="flex items-center gap-2">
             {Number(item.currentStock).toFixed(1)}
-            {isLow && <Badge variant="danger">Low</Badge>}
+            {isLow && <Badge variant="danger">{t('chemicals.lowStock')}</Badge>}
           </span>
         );
       },
     },
-    { key: 'minimumStock', header: 'Min Stock', render: (item: any) => Number(item.minimumStock).toFixed(1) },
-    { key: 'costPerUnit', header: 'Cost/Unit', render: (item: any) => item.costPerUnit ? `₹${Number(item.costPerUnit).toFixed(2)}` : '-' },
-    { key: 'supplier', header: 'Supplier', render: (item: any) => item.supplier || '-' },
+    { key: 'minimumStock', header: t('chemicals.minStock'), render: (item: any) => Number(item.minimumStock).toFixed(1) },
+    { key: 'costPerUnit', header: t('chemicals.costPerUnit'), render: (item: any) => item.costPerUnit ? `₹${Number(item.costPerUnit).toFixed(2)}` : '-' },
+    { key: 'supplier', header: t('chemicals.supplier'), render: (item: any) => item.supplier || '-' },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('common.actions'),
       render: (item: any) => (
         <div className="flex gap-1">
           <Button size="sm" variant="ghost" icon={<Pencil className="w-3 h-3" />} onClick={(e) => { e.stopPropagation(); handleEditChem(item); }} />
-          <Button size="sm" variant="ghost" icon={<Trash2 className="w-3 h-3 text-red-500" />} onClick={(e) => { e.stopPropagation(); if (confirm('Delete this chemical?')) deleteChemMutation.mutate(item.id); }} />
+          <Button size="sm" variant="ghost" icon={<Trash2 className="w-3 h-3 text-red-500" />} onClick={(e) => { e.stopPropagation(); if (confirm(t('chemicals.deleteChemical'))) deleteChemMutation.mutate(item.id); }} />
         </div>
       ),
     },
   ];
 
   const usageColumns = [
-    { key: 'usageDate', header: 'Date', render: (item: any) => new Date(item.usageDate || item.createdAt).toLocaleDateString() },
-    { key: 'chemical', header: 'Chemical', render: (item: any) => item.chemical?.name || `#${item.chemicalId}` },
-    { key: 'pond', header: 'Pond', render: (item: any) => item.pond?.name || `Pond #${item.pondId}` },
-    { key: 'quantityUsed', header: 'Quantity', render: (item: any) => Number(item.quantityUsed).toFixed(2) },
-    { key: 'purpose', header: 'Purpose', render: (item: any) => item.purpose || '-' },
+    { key: 'usageDate', header: t('common.date'), render: (item: any) => new Date(item.usageDate || item.createdAt).toLocaleDateString() },
+    { key: 'chemical', header: t('chemicals.chemicalsTab'), render: (item: any) => item.chemical?.name || `#${item.chemicalId}` },
+    { key: 'pond', header: t('harvest.pond'), render: (item: any) => item.pond?.name || `Pond #${item.pondId}` },
+    { key: 'quantityUsed', header: t('inventory.quantity'), render: (item: any) => Number(item.quantityUsed).toFixed(2) },
+    { key: 'purpose', header: t('chemicals.purpose'), render: (item: any) => item.purpose || '-' },
   ];
 
   const chemicalsTab = (
@@ -241,27 +243,27 @@ export default function ChemicalsPage() {
             icon={<RefreshCw className="w-4 h-4" />}
             loading={loadDefaultsMutation.isPending}
             onClick={() => {
-              if (confirm('Load the 8 default spirulina minerals into inventory? You can edit stock levels after loading.')) {
+              if (confirm(t('chemicals.loadDefaultMinerals'))) {
                 loadDefaultsMutation.mutate();
               }
             }}
           >
-            Load Default Minerals
+            {t('chemicals.loadDefaultMinerals')}
           </Button>
         )}
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => { resetChemForm(); setShowChemModal(true); }}>
-          Add Chemical
+          {t('chemicals.addChemical')}
         </Button>
       </div>
       {chemsLoading ? <PageLoader /> : chemList.length === 0 ? (
         <EmptyState
           icon={<FlaskConical size={48} />}
-          title="No chemicals"
-          description="Add chemicals to track inventory, or load the default mineral list"
+          title={t('chemicals.noChemicals')}
+          description={t('chemicals.noChemicals')}
           action={
             <div className="flex gap-2">
-              <Button variant="secondary" icon={<RefreshCw className="w-4 h-4" />} loading={loadDefaultsMutation.isPending} onClick={() => loadDefaultsMutation.mutate()}>Load Default Minerals</Button>
-              <Button onClick={() => setShowChemModal(true)}>Add Chemical</Button>
+              <Button variant="secondary" icon={<RefreshCw className="w-4 h-4" />} loading={loadDefaultsMutation.isPending} onClick={() => loadDefaultsMutation.mutate()}>{t('chemicals.loadDefaultMinerals')}</Button>
+              <Button onClick={() => setShowChemModal(true)}>{t('chemicals.addChemical')}</Button>
             </div>
           }
         />
@@ -280,11 +282,11 @@ export default function ChemicalsPage() {
     <div>
       <div className="flex justify-end mb-4">
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowUsageModal(true)}>
-          Log Usage
+          {t('chemicals.logUsage')}
         </Button>
       </div>
       {usageLoading ? <PageLoader /> : usageList.length === 0 ? (
-        <EmptyState icon={<ClipboardList size={48} />} title="No usage records" description="Log chemical usage to track consumption" action={<Button onClick={() => setShowUsageModal(true)}>Log Usage</Button>} />
+        <EmptyState icon={<ClipboardList size={48} />} title={t('chemicals.noUsageRecords')} description={t('chemicals.noUsageRecords')} action={<Button onClick={() => setShowUsageModal(true)}>{t('chemicals.logUsage')}</Button>} />
       ) : (
         <>
           <DataTable columns={usageColumns} data={usageList} />
@@ -299,59 +301,59 @@ export default function ChemicalsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Chemical & Nutrient Management</h1>
-        <p className="text-sm text-gray-500 mt-1">Manage chemical inventory and track usage</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('chemicals.title')}</h1>
+        <p className="text-sm text-gray-500 mt-1">{t('chemicals.subtitle')}</p>
       </div>
 
       <Tabs tabs={[
-        { id: 'chemicals', label: 'Chemicals', icon: <FlaskConical size={16} />, content: chemicalsTab },
-        { id: 'usage', label: 'Usage Log', icon: <ClipboardList size={16} />, content: usageTab },
+        { id: 'chemicals', label: t('chemicals.chemicalsTab'), icon: <FlaskConical size={16} />, content: chemicalsTab },
+        { id: 'usage', label: t('chemicals.usageLog'), icon: <ClipboardList size={16} />, content: usageTab },
       ]} />
 
       {/* Add Chemical Modal */}
-      <Modal isOpen={showChemModal} onClose={() => { setShowChemModal(false); resetChemForm(); }} title={editingChem ? 'Edit Chemical' : 'Add Chemical'} size="lg">
+      <Modal isOpen={showChemModal} onClose={() => { setShowChemModal(false); resetChemForm(); }} title={editingChem ? t('chemicals.editChemical') : t('chemicals.addChemical')} size="lg">
         <form onSubmit={handleChemSubmit} className="space-y-4">
-          <Input label="Name" value={chemForm.name} onChange={(e) => setChemForm({ ...chemForm, name: e.target.value })} required />
+          <Input label={t('common.name')} value={chemForm.name} onChange={(e) => setChemForm({ ...chemForm, name: e.target.value })} required />
           <div className="grid grid-cols-2 gap-4">
-            <Select label="Category" options={[
-              { value: 'nutrient', label: 'Nutrient' },
-              { value: 'mineral', label: 'Mineral' },
-              { value: 'pH-adjuster', label: 'pH Adjuster' },
-              { value: 'other', label: 'Other' },
+            <Select label={t('common.category')} options={[
+              { value: 'nutrient', label: t('chemicals.nutrient') },
+              { value: 'mineral', label: t('chemicals.mineral') },
+              { value: 'pH-adjuster', label: t('chemicals.phAdjuster') },
+              { value: 'other', label: t('chemicals.other') },
             ]} value={chemForm.category} onChange={(e) => setChemForm({ ...chemForm, category: e.target.value })} />
-            <Select label="Unit" options={[
-              { value: 'kg', label: 'Kilograms' },
-              { value: 'g', label: 'Grams' },
-              { value: 'L', label: 'Liters' },
-              { value: 'mL', label: 'Milliliters' },
+            <Select label={t('chemicals.unit')} options={[
+              { value: 'kg', label: t('chemicals.kilograms') },
+              { value: 'g', label: t('chemicals.grams') },
+              { value: 'L', label: t('chemicals.liters') },
+              { value: 'mL', label: t('chemicals.milliliters') },
             ]} value={chemForm.unit} onChange={(e) => setChemForm({ ...chemForm, unit: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Current Stock" type="number" step="0.1" value={chemForm.currentStock} onChange={(e) => setChemForm({ ...chemForm, currentStock: e.target.value })} required />
-            <Input label="Minimum Stock" type="number" step="0.1" value={chemForm.minimumStock} onChange={(e) => setChemForm({ ...chemForm, minimumStock: e.target.value })} required />
+            <Input label={t('chemicals.currentStock')} type="number" step="0.1" value={chemForm.currentStock} onChange={(e) => setChemForm({ ...chemForm, currentStock: e.target.value })} required />
+            <Input label={t('chemicals.minStock')} type="number" step="0.1" value={chemForm.minimumStock} onChange={(e) => setChemForm({ ...chemForm, minimumStock: e.target.value })} required />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Cost per Unit (₹)" type="number" step="0.01" value={chemForm.costPerUnit} onChange={(e) => setChemForm({ ...chemForm, costPerUnit: e.target.value })} />
-            <Input label="Supplier" value={chemForm.supplier} onChange={(e) => setChemForm({ ...chemForm, supplier: e.target.value })} />
+            <Input label={t('chemicals.costPerUnit')} type="number" step="0.01" value={chemForm.costPerUnit} onChange={(e) => setChemForm({ ...chemForm, costPerUnit: e.target.value })} />
+            <Input label={t('chemicals.supplier')} value={chemForm.supplier} onChange={(e) => setChemForm({ ...chemForm, supplier: e.target.value })} />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="secondary" type="button" onClick={() => setShowChemModal(false)}>Cancel</Button>
-            <Button type="submit" loading={createChemMutation.isPending || updateChemMutation.isPending}>{editingChem ? 'Update Chemical' : 'Add Chemical'}</Button>
+            <Button variant="secondary" type="button" onClick={() => setShowChemModal(false)}>{t('common.cancel')}</Button>
+            <Button type="submit" loading={createChemMutation.isPending || updateChemMutation.isPending}>{editingChem ? t('common.update') : t('chemicals.addChemical')}</Button>
           </div>
         </form>
       </Modal>
 
       {/* Log Usage Modal */}
-      <Modal isOpen={showUsageModal} onClose={() => setShowUsageModal(false)} title="Log Chemical Usage">
+      <Modal isOpen={showUsageModal} onClose={() => setShowUsageModal(false)} title={t('chemicals.logUsage')}>
         <form onSubmit={handleUsageSubmit} className="space-y-4">
-          <Select label="Chemical" options={chemOptions} placeholder="Select chemical" value={usageForm.chemicalId} onChange={(e) => setUsageForm({ ...usageForm, chemicalId: e.target.value })} required />
-          <Select label="Pond" options={pondOptions} placeholder="Select pond" value={usageForm.pondId} onChange={(e) => setUsageForm({ ...usageForm, pondId: e.target.value })} required />
-          <Input label="Quantity Used" type="number" step="0.01" value={usageForm.quantityUsed} onChange={(e) => setUsageForm({ ...usageForm, quantityUsed: e.target.value })} required />
-          <Input label="Usage Date" type="date" value={usageForm.usageDate} onChange={(e) => setUsageForm({ ...usageForm, usageDate: e.target.value })} required />
-          <Input label="Purpose" value={usageForm.purpose} onChange={(e) => setUsageForm({ ...usageForm, purpose: e.target.value })} placeholder="e.g. pH correction, feeding..." />
+          <Select label={t('chemicals.chemicalSelect')} options={chemOptions} placeholder={t('chemicals.chemicalSelect')} value={usageForm.chemicalId} onChange={(e) => setUsageForm({ ...usageForm, chemicalId: e.target.value })} required />
+          <Select label={t('chemicals.pondSelect')} options={pondOptions} placeholder={t('chemicals.pondSelect')} value={usageForm.pondId} onChange={(e) => setUsageForm({ ...usageForm, pondId: e.target.value })} required />
+          <Input label={t('chemicals.quantityUsed')} type="number" step="0.01" value={usageForm.quantityUsed} onChange={(e) => setUsageForm({ ...usageForm, quantityUsed: e.target.value })} required />
+          <Input label={t('chemicals.usageDate')} type="date" value={usageForm.usageDate} onChange={(e) => setUsageForm({ ...usageForm, usageDate: e.target.value })} required />
+          <Input label={t('chemicals.purpose')} value={usageForm.purpose} onChange={(e) => setUsageForm({ ...usageForm, purpose: e.target.value })} placeholder="e.g. pH correction, feeding..." />
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="secondary" type="button" onClick={() => setShowUsageModal(false)}>Cancel</Button>
-            <Button type="submit" loading={logUsageMutation.isPending}>Log Usage</Button>
+            <Button variant="secondary" type="button" onClick={() => setShowUsageModal(false)}>{t('common.cancel')}</Button>
+            <Button type="submit" loading={logUsageMutation.isPending}>{t('chemicals.logUsage')}</Button>
           </div>
         </form>
       </Modal>

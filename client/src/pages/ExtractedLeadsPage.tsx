@@ -1,21 +1,10 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Search, CheckCircle, XCircle, RefreshCw, ExternalLink } from 'lucide-react';
 import { Button, Card, CardBody, DataTable, Pagination, PageLoader, EmptyState, Badge, Select } from '../components/ui';
 import { extractedLeadsApi } from '../services/modules.api';
-
-const CATEGORIES = [
-  { value: '', label: 'All Categories' },
-  { value: 'nutraceuticals', label: 'Nutraceuticals' },
-  { value: 'poultry_farm', label: 'Poultry Farms' },
-  { value: 'livestock', label: 'Livestock' },
-  { value: 'fisheries', label: 'Fisheries' },
-  { value: 'shrimp', label: 'Shrimp Farms' },
-  { value: 'aquaculture', label: 'Aquaculture' },
-  { value: 'animal_feed', label: 'Animal Feed' },
-  { value: 'health_supplements', label: 'Health Supplements' },
-];
 
 const STATUS_BADGE: Record<string, 'default' | 'info' | 'success' | 'danger' | 'warning'> = {
   new: 'info',
@@ -26,11 +15,24 @@ const STATUS_BADGE: Record<string, 'default' | 'info' | 'success' | 'danger' | '
 };
 
 export default function ExtractedLeadsPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [selected, setSelected] = useState<number[]>([]);
+
+  const CATEGORIES = [
+    { value: '', label: t('extractedLeads.allCategories') },
+    { value: 'nutraceuticals', label: t('extractedLeads.nutraceuticals') },
+    { value: 'poultry_farm', label: t('extractedLeads.poultryFarms') },
+    { value: 'livestock', label: t('extractedLeads.livestock') },
+    { value: 'fisheries', label: t('extractedLeads.fisheries') },
+    { value: 'shrimp', label: t('extractedLeads.shrimpFarms') },
+    { value: 'aquaculture', label: t('extractedLeads.aquaculture') },
+    { value: 'animal_feed', label: t('extractedLeads.animalFeed') },
+    { value: 'health_supplements', label: t('extractedLeads.healthSupplements') },
+  ];
 
   const { data, isLoading } = useQuery({
     queryKey: ['extracted-leads', { page, status: statusFilter, category: categoryFilter }],
@@ -45,34 +47,34 @@ export default function ExtractedLeadsPage() {
   const reviewMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => extractedLeadsApi.review(id, { status }),
     onSuccess: (_, vars) => {
-      toast.success(`Lead ${vars.status}`);
+      toast.success(vars.status === 'approved' ? t('extractedLeads.leadApproved') : t('extractedLeads.leadRejected'));
       queryClient.invalidateQueries({ queryKey: ['extracted-leads'] });
       queryClient.invalidateQueries({ queryKey: ['extracted-leads-stats'] });
       queryClient.invalidateQueries({ queryKey: ['leads'] });
     },
-    onError: () => toast.error('Failed to review lead'),
+    onError: () => toast.error(t('common.failed')),
   });
 
   const bulkReviewMutation = useMutation({
     mutationFn: (data: { ids: number[]; status: string }) => extractedLeadsApi.bulkReview(data),
     onSuccess: (result: any) => {
-      toast.success(`Approved: ${result.approved}, Rejected: ${result.rejected}, Skipped: ${result.skipped}`);
+      toast.success(t('extractedLeads.bulkReviewCompleted'));
       queryClient.invalidateQueries({ queryKey: ['extracted-leads'] });
       queryClient.invalidateQueries({ queryKey: ['extracted-leads-stats'] });
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       setSelected([]);
     },
-    onError: () => toast.error('Bulk review failed'),
+    onError: () => toast.error(t('common.failed')),
   });
 
   const triggerMutation = useMutation({
     mutationFn: () => extractedLeadsApi.trigger(),
     onSuccess: (result: any) => {
-      toast.success(`Extracted ${result?.count ?? 0} new leads`);
+      toast.success(t('extractedLeads.extractionCompleted'));
       queryClient.invalidateQueries({ queryKey: ['extracted-leads'] });
       queryClient.invalidateQueries({ queryKey: ['extracted-leads-stats'] });
     },
-    onError: () => toast.error('Extraction failed. Check API key configuration.'),
+    onError: () => toast.error(t('extractedLeads.extractionFailed')),
   });
 
   const items = (data as any)?.data || [];
@@ -94,15 +96,15 @@ export default function ExtractedLeadsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Extracted Leads</h1>
-          <p className="text-sm text-gray-500">Auto-discovered businesses via Google Places</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('extractedLeads.title')}</h1>
+          <p className="text-sm text-gray-500">{t('extractedLeads.subtitle')}</p>
         </div>
         <Button
           onClick={() => triggerMutation.mutate()}
           loading={triggerMutation.isPending}
           icon={<RefreshCw size={16} />}
         >
-          Extract Now
+          {t('extractedLeads.extractNow')}
         </Button>
       </div>
 
@@ -119,7 +121,7 @@ export default function ExtractedLeadsPage() {
         <Card>
           <CardBody className="text-center py-3">
             <p className="text-2xl font-bold text-purple-700">{statsData?.extractedToday ?? 0}</p>
-            <p className="text-xs text-gray-500">Extracted Today</p>
+            <p className="text-xs text-gray-500">{t('crm.extractedToday')}</p>
           </CardBody>
         </Card>
       </div>
@@ -130,10 +132,10 @@ export default function ExtractedLeadsPage() {
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           options={[
-            { value: '', label: 'All Statuses' },
-            { value: 'new', label: 'New' },
-            { value: 'approved', label: 'Approved' },
-            { value: 'rejected', label: 'Rejected' },
+            { value: '', label: t('extractedLeads.allStatuses') },
+            { value: 'new', label: t('extractedLeads.newStatus') },
+            { value: 'approved', label: t('common.approved') },
+            { value: 'rejected', label: t('common.rejected') },
           ]}
         />
         <Select
@@ -144,10 +146,10 @@ export default function ExtractedLeadsPage() {
         {selected.length > 0 && (
           <>
             <Button size="sm" variant="primary" onClick={() => bulkReviewMutation.mutate({ ids: selected, status: 'approved' })}>
-              Approve ({selected.length})
+              {t('extractedLeads.approve')} ({selected.length})
             </Button>
             <Button size="sm" variant="danger" onClick={() => bulkReviewMutation.mutate({ ids: selected, status: 'rejected' })}>
-              Reject ({selected.length})
+              {t('extractedLeads.reject')} ({selected.length})
             </Button>
           </>
         )}
@@ -157,8 +159,8 @@ export default function ExtractedLeadsPage() {
       {items.length === 0 ? (
         <EmptyState
           icon={<Search size={48} />}
-          title="No extracted leads"
-          description="Click 'Extract Now' to discover businesses or configure the Google Places API key in Settings."
+          title={t('extractedLeads.noExtractedLeads')}
+          description={t('extractedLeads.noExtractedLeadsDesc')}
         />
       ) : (
         <Card>
@@ -169,12 +171,12 @@ export default function ExtractedLeadsPage() {
                   <th className="px-4 py-3 text-left">
                     <input type="checkbox" checked={selected.length === items.length && items.length > 0} onChange={toggleSelectAll} />
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Business</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('extractedLeads.business')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('leads.contact')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.category')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.status')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.date')}</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -208,14 +210,14 @@ export default function ExtractedLeadsPage() {
                           <button
                             onClick={() => reviewMutation.mutate({ id: item.id, status: 'approved' })}
                             className="p-1 text-green-600 hover:bg-green-50 rounded"
-                            title="Approve"
+                            title={t('extractedLeads.approve')}
                           >
                             <CheckCircle size={18} />
                           </button>
                           <button
                             onClick={() => reviewMutation.mutate({ id: item.id, status: 'rejected' })}
                             className="p-1 text-red-600 hover:bg-red-50 rounded"
-                            title="Reject"
+                            title={t('extractedLeads.reject')}
                           >
                             <XCircle size={18} />
                           </button>

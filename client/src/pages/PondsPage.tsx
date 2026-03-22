@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Search, Filter } from 'lucide-react';
 import { Button, Input, Select, Pagination, PageLoader, EmptyState } from '../components/ui';
 import { PondCard, PondForm } from '../components/ponds';
@@ -6,6 +7,7 @@ import { usePonds, useDeletePond } from '../hooks/usePonds';
 import type { Pond } from '@spirulina/shared';
 
 export default function PondsPage() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -32,7 +34,7 @@ export default function PondsPage() {
   };
 
   const handleDelete = (pond: Pond) => {
-    if (confirm('Delete this pond?')) {
+    if (confirm(t('ponds.deletePond'))) {
       deletePondMutation.mutate(pond.id);
     }
   };
@@ -47,11 +49,11 @@ export default function PondsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ponds</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage your spirulina cultivation ponds</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('ponds.title')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('ponds.subtitle')}</p>
         </div>
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowForm(true)}>
-          Add Pond
+          {t('ponds.addPond')}
         </Button>
       </div>
 
@@ -61,7 +63,7 @@ export default function PondsPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search ponds..."
+            placeholder={t('ponds.searchPonds')}
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             className="input-field pl-10"
@@ -72,20 +74,20 @@ export default function PondsPage() {
           onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
           className="input-field w-full sm:w-40"
         >
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="maintenance">Maintenance</option>
+          <option value="">{t('ponds.allStatus')}</option>
+          <option value="active">{t('ponds.active')}</option>
+          <option value="inactive">{t('ponds.inactive')}</option>
+          <option value="maintenance">{t('ponds.maintenance')}</option>
         </select>
         <select
           value={healthFilter}
           onChange={e => { setHealthFilter(e.target.value); setPage(1); }}
           className="input-field w-full sm:w-40"
         >
-          <option value="">All Health</option>
-          <option value="GREEN">Green</option>
-          <option value="YELLOW">Yellow</option>
-          <option value="RED">Red</option>
+          <option value="">{t('ponds.allHealth')}</option>
+          <option value="GREEN">{t('ponds.green')}</option>
+          <option value="YELLOW">{t('ponds.yellow')}</option>
+          <option value="RED">{t('ponds.red')}</option>
         </select>
       </div>
 
@@ -94,11 +96,11 @@ export default function PondsPage() {
         <PageLoader />
       ) : ponds.length === 0 ? (
         <EmptyState
-          title="No ponds found"
-          description={search || statusFilter || healthFilter ? 'Try adjusting your filters' : 'Get started by adding your first pond'}
+          title={t('ponds.noPondsFound')}
+          description={search || statusFilter || healthFilter ? 'Try adjusting your filters' : t('ponds.addFirstPond')}
           action={
             !search && !statusFilter && !healthFilter ? (
-              <Button onClick={() => setShowForm(true)}>Add First Pond</Button>
+              <Button onClick={() => setShowForm(true)}>{t('ponds.addFirstPond')}</Button>
             ) : undefined
           }
         />

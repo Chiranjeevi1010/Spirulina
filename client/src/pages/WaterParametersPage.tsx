@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Plus, Droplets, Pencil, Trash2 } from 'lucide-react';
@@ -7,51 +8,53 @@ import { pondsApi } from '../services/ponds.api';
 import { usePonds, useWaterParameters, useCreateWaterParameter, useUpdateWaterParameter, useDeleteWaterParameter } from '../hooks/usePonds';
 import type { WaterParameter, CreateWaterParameterRequest } from '@spirulina/shared';
 
-const readingTimeOptions = [
-  { value: 'morning', label: 'Morning (6-9 AM)' },
-  { value: 'noon', label: 'Noon (12-3 PM)' },
-  { value: 'evening', label: 'Evening (5-7 PM)' },
-];
-
-const foamLevelOptions = [
-  { value: '', label: 'Select...' },
-  { value: 'none', label: 'None' },
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-];
-
-const defaultForm = {
-  readingDate: new Date().toISOString().slice(0, 10),
-  readingTime: 'morning' as string,
-  ph: '',
-  salinityPpt: '',
-  temperatureC: '',
-  carbonateCo3: '',
-  bicarbonateHco3: '',
-  alkalinity: '',
-  totalHardness: '',
-  calciumCa: '',
-  magnesiumMg: '',
-  sodiumNa: '',
-  potassiumK: '',
-  totalAmmonia: '',
-  ammoniaNh3: '',
-  nitriteNo2: '',
-  dissolvedOxygen: '',
-  nitrateNo3: '',
-  foamLevel: '',
-  paddleWheelRpm: '',
-  harvestPercentage: '',
-  notes: '',
-};
-
 export default function WaterParametersPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedPondId, setSelectedPondId] = useState<number | undefined>(undefined);
   const [page, setPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<WaterParameter | null>(null);
+
+  const readingTimeOptions = [
+    { value: 'morning', label: t('waterParameters.morning') },
+    { value: 'noon', label: t('waterParameters.noon') },
+    { value: 'evening', label: t('waterParameters.evening') },
+  ];
+
+  const foamLevelOptions = [
+    { value: '', label: t('common.selectOption') },
+    { value: 'none', label: t('waterParameters.none') },
+    { value: 'low', label: t('waterParameters.low') },
+    { value: 'medium', label: t('waterParameters.medium') },
+    { value: 'high', label: t('waterParameters.high') },
+  ];
+
+  const defaultForm = {
+    readingDate: new Date().toISOString().slice(0, 10),
+    readingTime: 'morning' as string,
+    ph: '',
+    salinityPpt: '',
+    temperatureC: '',
+    carbonateCo3: '',
+    bicarbonateHco3: '',
+    alkalinity: '',
+    totalHardness: '',
+    calciumCa: '',
+    magnesiumMg: '',
+    sodiumNa: '',
+    potassiumK: '',
+    totalAmmonia: '',
+    ammoniaNh3: '',
+    nitriteNo2: '',
+    dissolvedOxygen: '',
+    nitrateNo3: '',
+    foamLevel: '',
+    paddleWheelRpm: '',
+    harvestPercentage: '',
+    notes: '',
+  };
+
   const [form, setForm] = useState(defaultForm);
 
   const { data: pondsData, isLoading: pondsLoading } = usePonds({ limit: 100 });
@@ -157,7 +160,7 @@ export default function WaterParametersPage() {
 
   const handleDelete = (item: WaterParameter) => {
     if (!selectedPondId) return;
-    if (confirm('Delete this reading?')) {
+    if (confirm(t('waterParameters.deleteReading'))) {
       deleteMutation.mutate({ pondId: selectedPondId, id: item.id });
     }
   };
@@ -169,34 +172,34 @@ export default function WaterParametersPage() {
   const columns = [
     {
       key: 'readingDate',
-      header: 'Date',
+      header: t('common.date'),
       render: (item: WaterParameter) => item.readingDate ? new Date(item.readingDate).toLocaleDateString() : '-',
     },
     {
       key: 'readingTime',
-      header: 'Time',
+      header: t('common.time'),
       render: (item: WaterParameter) => (
         <span className="capitalize">{item.readingTime || '-'}</span>
       ),
     },
     {
       key: 'temperatureC',
-      header: 'Temp (°C)',
+      header: `${t('waterParameters.temperature')} (°C)`,
       render: (item: WaterParameter) => item.temperatureC != null ? Number(item.temperatureC).toFixed(1) : '-',
     },
     {
       key: 'ph',
-      header: 'pH',
+      header: t('waterParameters.ph'),
       render: (item: WaterParameter) => item.ph != null ? Number(item.ph).toFixed(2) : '-',
     },
     {
       key: 'dissolvedOxygen',
-      header: 'DO (mg/L)',
+      header: `${t('waterParameters.dissolvedOxygen')} (mg/L)`,
       render: (item: WaterParameter) => item.dissolvedOxygen != null ? Number(item.dissolvedOxygen).toFixed(1) : '-',
     },
     {
       key: 'ammoniaNh3',
-      header: 'NH3 (mg/L)',
+      header: `${t('waterParameters.unionizedNH3')} (mg/L)`,
       render: (item: WaterParameter) => item.ammoniaNh3 != null ? Number(item.ammoniaNh3).toFixed(2) : '-',
     },
     {
@@ -206,20 +209,20 @@ export default function WaterParametersPage() {
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('common.actions'),
       render: (item: WaterParameter) => (
         <div className="flex items-center gap-2">
           <button
             className="p-1 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded"
             onClick={() => handleEdit(item)}
-            title="Edit"
+            title={t('common.edit')}
           >
             <Pencil className="w-4 h-4" />
           </button>
           <button
             className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded"
             onClick={() => handleDelete(item)}
-            title="Delete"
+            title={t('common.delete')}
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -235,15 +238,15 @@ export default function WaterParametersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Water Parameters</h1>
-          <p className="text-sm text-gray-500 mt-1">Track and manage water quality readings</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('waterParameters.title')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('waterParameters.subtitle')}</p>
         </div>
         <Button
           icon={<Plus className="w-4 h-4" />}
           onClick={() => setShowModal(true)}
           disabled={!selectedPondId}
         >
-          Add Reading
+          {t('waterParameters.addReading')}
         </Button>
       </div>
 
@@ -254,7 +257,7 @@ export default function WaterParametersPage() {
           onChange={(e) => { setSelectedPondId(e.target.value ? Number(e.target.value) : undefined); setPage(1); }}
           className="input-field w-full sm:w-64"
         >
-          <option value="">Select a pond...</option>
+          <option value="">{t('waterParameters.selectPond')}</option>
           {pondsList.map((p) => (
             <option key={p.id} value={p.id}>{p.name} ({p.code})</option>
           ))}
@@ -265,17 +268,17 @@ export default function WaterParametersPage() {
       {!selectedPondId ? (
         <EmptyState
           icon={<Droplets size={48} />}
-          title="Select a pond"
-          description="Choose a pond above to view its water parameter readings"
+          title={t('waterParameters.selectPond')}
+          description={t('waterParameters.selectPond')}
         />
       ) : isLoading ? (
         <PageLoader />
       ) : readings.length === 0 ? (
         <EmptyState
           icon={<Droplets size={48} />}
-          title="No readings yet"
-          description="Add your first water parameter reading for this pond"
-          action={<Button onClick={() => setShowModal(true)}>Add Reading</Button>}
+          title={t('waterParameters.noReadings')}
+          description={t('waterParameters.noReadings')}
+          action={<Button onClick={() => setShowModal(true)}>{t('waterParameters.addReading')}</Button>}
         />
       ) : (
         <>
@@ -289,16 +292,16 @@ export default function WaterParametersPage() {
       )}
 
       {/* Add/Edit Modal */}
-      <Modal isOpen={showModal} onClose={closeModal} title={`${editingItem ? 'Edit' : 'Add'} Water Parameters — ${selectedPond?.name ?? ''} (${selectedPond?.code ?? ''})`} size="xl">
+      <Modal isOpen={showModal} onClose={closeModal} title={`${editingItem ? t('common.edit') : t('common.add')} ${t('waterParameters.title')} — ${selectedPond?.name ?? ''} (${selectedPond?.code ?? ''})`} size="xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
           <Card>
             <CardBody>
-              <CardTitle>Reading Info</CardTitle>
+              <CardTitle>{t('waterParameters.readingDate')}</CardTitle>
               <div className="grid grid-cols-2 gap-4 mt-3">
-                <Input label="Reading Date" type="date" value={form.readingDate} onChange={(e) => updateField('readingDate', e.target.value)} required />
+                <Input label={t('waterParameters.readingDate')} type="date" value={form.readingDate} onChange={(e) => updateField('readingDate', e.target.value)} required />
                 <Select
-                  label="Reading Time"
+                  label={t('waterParameters.readingTime')}
                   options={readingTimeOptions}
                   value={form.readingTime}
                   onChange={(e) => updateField('readingTime', e.target.value)}
@@ -310,11 +313,11 @@ export default function WaterParametersPage() {
           {/* Water Quality */}
           <Card>
             <CardBody>
-              <CardTitle>Water Quality</CardTitle>
+              <CardTitle>{t('waterParameters.waterQuality')}</CardTitle>
               <div className="grid grid-cols-3 gap-4 mt-3">
-                <Input label="pH" type="number" step="0.01" value={form.ph} onChange={(e) => updateField('ph', e.target.value)} />
-                <Input label="Salinity (ppt)" type="number" step="0.1" value={form.salinityPpt} onChange={(e) => updateField('salinityPpt', e.target.value)} />
-                <Input label="Temperature (°C)" type="number" step="0.1" value={form.temperatureC} onChange={(e) => updateField('temperatureC', e.target.value)} />
+                <Input label={t('waterParameters.ph')} type="number" step="0.01" value={form.ph} onChange={(e) => updateField('ph', e.target.value)} />
+                <Input label={t('waterParameters.salinity')} type="number" step="0.1" value={form.salinityPpt} onChange={(e) => updateField('salinityPpt', e.target.value)} />
+                <Input label={t('waterParameters.temperature')} type="number" step="0.1" value={form.temperatureC} onChange={(e) => updateField('temperatureC', e.target.value)} />
               </div>
             </CardBody>
           </Card>
@@ -322,11 +325,11 @@ export default function WaterParametersPage() {
           {/* Carbonates & Alkalinity */}
           <Card>
             <CardBody>
-              <CardTitle>Carbonates & Alkalinity</CardTitle>
+              <CardTitle>{t('waterParameters.carbonatesAlkalinity')}</CardTitle>
               <div className="grid grid-cols-3 gap-4 mt-3">
-                <Input label="Carbonates CO3 (mg/L)" type="number" step="1" value={form.carbonateCo3} onChange={(e) => updateField('carbonateCo3', e.target.value)} />
-                <Input label="Bicarbonates HCO3 (mg/L)" type="number" step="1" value={form.bicarbonateHco3} onChange={(e) => updateField('bicarbonateHco3', e.target.value)} />
-                <Input label="Total Alkalinity (mg/L)" type="number" step="1" value={form.alkalinity} onChange={(e) => updateField('alkalinity', e.target.value)} />
+                <Input label={t('waterParameters.carbonates')} type="number" step="1" value={form.carbonateCo3} onChange={(e) => updateField('carbonateCo3', e.target.value)} />
+                <Input label={t('waterParameters.bicarbonates')} type="number" step="1" value={form.bicarbonateHco3} onChange={(e) => updateField('bicarbonateHco3', e.target.value)} />
+                <Input label={t('waterParameters.totalAlkalinity')} type="number" step="1" value={form.alkalinity} onChange={(e) => updateField('alkalinity', e.target.value)} />
               </div>
             </CardBody>
           </Card>
@@ -334,15 +337,15 @@ export default function WaterParametersPage() {
           {/* Hardness & Minerals */}
           <Card>
             <CardBody>
-              <CardTitle>Hardness & Minerals</CardTitle>
+              <CardTitle>{t('waterParameters.hardnessMinerals')}</CardTitle>
               <div className="grid grid-cols-3 gap-4 mt-3">
-                <Input label="Total Hardness (mg/L)" type="number" step="1" value={form.totalHardness} onChange={(e) => updateField('totalHardness', e.target.value)} />
-                <Input label="Calcium Ca (mg/L)" type="number" step="1" value={form.calciumCa} onChange={(e) => updateField('calciumCa', e.target.value)} />
-                <Input label="Magnesium Mg (mg/L)" type="number" step="1" value={form.magnesiumMg} onChange={(e) => updateField('magnesiumMg', e.target.value)} />
+                <Input label={t('waterParameters.totalHardness')} type="number" step="1" value={form.totalHardness} onChange={(e) => updateField('totalHardness', e.target.value)} />
+                <Input label={t('waterParameters.calcium')} type="number" step="1" value={form.calciumCa} onChange={(e) => updateField('calciumCa', e.target.value)} />
+                <Input label={t('waterParameters.magnesium')} type="number" step="1" value={form.magnesiumMg} onChange={(e) => updateField('magnesiumMg', e.target.value)} />
               </div>
               <div className="grid grid-cols-2 gap-4 mt-4">
-                <Input label="Sodium Na (mg/L)" type="number" step="1" value={form.sodiumNa} onChange={(e) => updateField('sodiumNa', e.target.value)} />
-                <Input label="Potassium K (mg/L)" type="number" step="1" value={form.potassiumK} onChange={(e) => updateField('potassiumK', e.target.value)} />
+                <Input label={t('waterParameters.sodium')} type="number" step="1" value={form.sodiumNa} onChange={(e) => updateField('sodiumNa', e.target.value)} />
+                <Input label={t('waterParameters.potassium')} type="number" step="1" value={form.potassiumK} onChange={(e) => updateField('potassiumK', e.target.value)} />
               </div>
             </CardBody>
           </Card>
@@ -350,12 +353,12 @@ export default function WaterParametersPage() {
           {/* Nitrogen & Dissolved Oxygen */}
           <Card>
             <CardBody>
-              <CardTitle>Nitrogen & Dissolved Oxygen</CardTitle>
+              <CardTitle>{t('waterParameters.nitrogenDO')}</CardTitle>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
-                <Input label="Total Ammonia (mg/L)" type="number" step="0.01" value={form.totalAmmonia} onChange={(e) => updateField('totalAmmonia', e.target.value)} />
-                <Input label="Un-ionized NH3 (mg/L)" type="number" step="0.01" value={form.ammoniaNh3} onChange={(e) => updateField('ammoniaNh3', e.target.value)} />
-                <Input label="Nitrite NO2 (mg/L)" type="number" step="0.01" value={form.nitriteNo2} onChange={(e) => updateField('nitriteNo2', e.target.value)} />
-                <Input label="DO (mg/L)" type="number" step="0.1" value={form.dissolvedOxygen} onChange={(e) => updateField('dissolvedOxygen', e.target.value)} />
+                <Input label={t('waterParameters.totalAmmonia')} type="number" step="0.01" value={form.totalAmmonia} onChange={(e) => updateField('totalAmmonia', e.target.value)} />
+                <Input label={t('waterParameters.unionizedNH3')} type="number" step="0.01" value={form.ammoniaNh3} onChange={(e) => updateField('ammoniaNh3', e.target.value)} />
+                <Input label={t('waterParameters.nitrite')} type="number" step="0.01" value={form.nitriteNo2} onChange={(e) => updateField('nitriteNo2', e.target.value)} />
+                <Input label={t('waterParameters.dissolvedOxygen')} type="number" step="0.1" value={form.dissolvedOxygen} onChange={(e) => updateField('dissolvedOxygen', e.target.value)} />
               </div>
             </CardBody>
           </Card>
@@ -363,28 +366,28 @@ export default function WaterParametersPage() {
           {/* Other */}
           <Card>
             <CardBody>
-              <CardTitle>Other Parameters</CardTitle>
+              <CardTitle>{t('waterParameters.otherParams')}</CardTitle>
               <div className="grid grid-cols-3 gap-4 mt-3">
-                <Select label="Foam Level" options={foamLevelOptions} value={form.foamLevel} onChange={(e) => updateField('foamLevel', e.target.value)} />
-                <Input label="Paddle Wheel RPM" type="number" step="1" value={form.paddleWheelRpm} onChange={(e) => updateField('paddleWheelRpm', e.target.value)} />
-                <Input label="Harvest %" type="number" step="0.1" value={form.harvestPercentage} onChange={(e) => updateField('harvestPercentage', e.target.value)} />
+                <Select label={t('waterParameters.foamLevel')} options={foamLevelOptions} value={form.foamLevel} onChange={(e) => updateField('foamLevel', e.target.value)} />
+                <Input label={t('waterParameters.paddleWheelRPM')} type="number" step="1" value={form.paddleWheelRpm} onChange={(e) => updateField('paddleWheelRpm', e.target.value)} />
+                <Input label={t('waterParameters.harvestPercent')} type="number" step="0.1" value={form.harvestPercentage} onChange={(e) => updateField('harvestPercentage', e.target.value)} />
               </div>
               <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('waterParameters.observations')}</label>
                 <textarea
                   className="input-field min-h-[60px]"
                   value={form.notes}
                   onChange={(e) => updateField('notes', e.target.value)}
-                  placeholder="Observations..."
+                  placeholder={t('waterParameters.observations')}
                 />
               </div>
             </CardBody>
           </Card>
 
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="button" variant="secondary" onClick={closeModal}>Cancel</Button>
+            <Button type="button" variant="secondary" onClick={closeModal}>{t('common.cancel')}</Button>
             <Button type="submit" loading={createMutation.isPending || updateMutation.isPending}>
-              {editingItem ? 'Update Reading' : 'Save Reading'}
+              {editingItem ? t('waterParameters.updateReading') : t('waterParameters.saveReading')}
             </Button>
           </div>
         </form>

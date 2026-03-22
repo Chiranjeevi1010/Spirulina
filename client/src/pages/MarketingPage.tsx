@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -7,6 +8,7 @@ import { Button, Input, Select, Card, CardBody, CardTitle, DataTable, Modal, Tab
 import { marketingApi } from '../services/modules.api';
 
 export default function MarketingPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [farmPage, setFarmPage] = useState(1);
@@ -49,59 +51,59 @@ export default function MarketingPage() {
   const createFarmMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => marketingApi.createDemoFarm(data),
     onSuccess: () => {
-      toast.success('Demo farm added');
+      toast.success(t('marketing.demoFarmAdded'));
       queryClient.invalidateQueries({ queryKey: ['demo-farms'] });
       closeFarmModal();
     },
-    onError: () => toast.error('Failed to add demo farm'),
+    onError: () => toast.error(t('marketing.demoFarmAddFailed')),
   });
 
   const updateFarmMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => marketingApi.updateDemoFarm(id, data),
     onSuccess: () => {
-      toast.success('Demo farm updated');
+      toast.success(t('marketing.demoFarmUpdated'));
       queryClient.invalidateQueries({ queryKey: ['demo-farms'] });
       closeFarmModal();
     },
-    onError: () => toast.error('Failed to update demo farm'),
+    onError: () => toast.error(t('marketing.demoFarmUpdateFailed')),
   });
 
   const deleteFarmMutation = useMutation({
     mutationFn: (id: number) => marketingApi.deleteDemoFarm(id),
     onSuccess: () => {
-      toast.success('Demo farm deleted');
+      toast.success(t('marketing.demoFarmDeleted'));
       queryClient.invalidateQueries({ queryKey: ['demo-farms'] });
     },
-    onError: () => toast.error('Failed to delete demo farm'),
+    onError: () => toast.error(t('marketing.demoFarmDeleteFailed')),
   });
 
   const createTestimonialMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => marketingApi.createTestimonial(data),
     onSuccess: () => {
-      toast.success('Testimonial added');
+      toast.success(t('marketing.testimonialAdded'));
       queryClient.invalidateQueries({ queryKey: ['testimonials'] });
       closeTestimonialModal();
     },
-    onError: () => toast.error('Failed to add testimonial'),
+    onError: () => toast.error(t('marketing.testimonialAddFailed')),
   });
 
   const updateTestimonialMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => marketingApi.updateTestimonial(id, data),
     onSuccess: () => {
-      toast.success('Testimonial updated');
+      toast.success(t('marketing.testimonialUpdated'));
       queryClient.invalidateQueries({ queryKey: ['testimonials'] });
       closeTestimonialModal();
     },
-    onError: () => toast.error('Failed to update testimonial'),
+    onError: () => toast.error(t('marketing.testimonialUpdateFailed')),
   });
 
   const deleteTestimonialMutation = useMutation({
     mutationFn: (id: number) => marketingApi.deleteTestimonial(id),
     onSuccess: () => {
-      toast.success('Testimonial deleted');
+      toast.success(t('marketing.testimonialDeleted'));
       queryClient.invalidateQueries({ queryKey: ['testimonials'] });
     },
-    onError: () => toast.error('Failed to delete testimonial'),
+    onError: () => toast.error(t('marketing.testimonialDeleteFailed')),
   });
 
   const resetFarmForm = () => {
@@ -178,14 +180,14 @@ export default function MarketingPage() {
   const testimonialPagination = testimonials?.meta;
 
   const farmColumns = [
-    { key: 'farmName', header: 'Farm Name' },
-    { key: 'farmerName', header: 'Farmer' },
-    { key: 'location', header: 'Location', render: (item: any) => [item.location, item.district, item.state].filter(Boolean).join(', ') || '-' },
-    { key: 'trialStartDate', header: 'Trial Start', render: (item: any) => item.trialStartDate ? new Date(item.trialStartDate).toLocaleDateString() : '-' },
-    { key: 'trialEndDate', header: 'Trial End', render: (item: any) => item.trialEndDate ? new Date(item.trialEndDate).toLocaleDateString() : '-' },
+    { key: 'farmName', header: t('marketing.farmName') },
+    { key: 'farmerName', header: t('marketing.farmer') },
+    { key: 'location', header: t('ponds.location'), render: (item: any) => [item.location, item.district, item.state].filter(Boolean).join(', ') || '-' },
+    { key: 'trialStartDate', header: t('marketing.trialStart'), render: (item: any) => item.trialStartDate ? new Date(item.trialStartDate).toLocaleDateString() : '-' },
+    { key: 'trialEndDate', header: t('marketing.trialEnd'), render: (item: any) => item.trialEndDate ? new Date(item.trialEndDate).toLocaleDateString() : '-' },
     {
       key: 'status',
-      header: 'Status',
+      header: t('common.status'),
       render: (item: any) => {
         const v: Record<string, 'success' | 'warning' | 'info' | 'default'> = { active: 'success', completed: 'info', planned: 'warning' };
         return <Badge variant={v[item.status] || 'default'}>{item.status || 'active'}</Badge>;
@@ -193,20 +195,20 @@ export default function MarketingPage() {
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('common.actions'),
       render: (item: any) => (
         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           <button
             className="p-1 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded"
             onClick={() => handleEditFarm(item)}
-            title="Edit"
+            title={t('common.edit')}
           >
             <Pencil className="w-4 h-4" />
           </button>
           <button
             className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded"
-            onClick={() => { if (confirm('Delete this demo farm?')) deleteFarmMutation.mutate(item.id); }}
-            title="Delete"
+            onClick={() => { if (confirm(t('marketing.deleteDemoFarm'))) deleteFarmMutation.mutate(item.id); }}
+            title={t('common.delete')}
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -219,11 +221,11 @@ export default function MarketingPage() {
     <div>
       <div className="flex justify-end mb-4">
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowFarmModal(true)}>
-          Add Demo Farm
+          {t('marketing.addDemoFarm')}
         </Button>
       </div>
       {farmsLoading ? <PageLoader /> : farmList.length === 0 ? (
-        <EmptyState icon={<Sprout size={48} />} title="No demo farms" description="Add a demo farm to track field trials" action={<Button onClick={() => setShowFarmModal(true)}>Add Demo Farm</Button>} />
+        <EmptyState icon={<Sprout size={48} />} title={t('marketing.noDemoFarms')} description={t('marketing.addDemoFarmHelp')} action={<Button onClick={() => setShowFarmModal(true)}>{t('marketing.addDemoFarm')}</Button>} />
       ) : (
         <>
           <DataTable columns={farmColumns} data={farmList} onRowClick={(item: any) => navigate(`/marketing/demo-farms/${item.id}`)} />
@@ -239,51 +241,51 @@ export default function MarketingPage() {
     <div>
       <div className="flex justify-end mb-4">
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowTestimonialModal(true)}>
-          Add Testimonial
+          {t('marketing.addTestimonial')}
         </Button>
       </div>
       {testimonialsLoading ? <PageLoader /> : testimonialList.length === 0 ? (
-        <EmptyState icon={<MessageSquareQuote size={48} />} title="No testimonials" description="Collect testimonials from your customers" action={<Button onClick={() => setShowTestimonialModal(true)}>Add Testimonial</Button>} />
+        <EmptyState icon={<MessageSquareQuote size={48} />} title={t('marketing.noTestimonials')} description={t('marketing.collectTestimonials')} action={<Button onClick={() => setShowTestimonialModal(true)}>{t('marketing.addTestimonial')}</Button>} />
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {testimonialList.map((t: any) => (
-              <Card key={t.id}>
+            {testimonialList.map((tItem: any) => (
+              <Card key={tItem.id}>
                 <CardBody>
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-                      <span className="text-primary-700 font-semibold">{(t.customerName || 'A').charAt(0).toUpperCase()}</span>
+                      <span className="text-primary-700 font-semibold">{(tItem.customerName || 'A').charAt(0).toUpperCase()}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900">{t.customerName}</p>
-                      {t.company && <p className="text-xs text-gray-500">{t.company}</p>}
+                      <p className="font-medium text-gray-900">{tItem.customerName}</p>
+                      {tItem.company && <p className="text-xs text-gray-500">{tItem.company}</p>}
                       <div className="flex items-center gap-0.5 mt-1">
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <Star key={i} size={14} className={i < (t.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} />
+                          <Star key={i} size={14} className={i < (tItem.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} />
                         ))}
                       </div>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button
                         className="p-1 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded"
-                        onClick={() => handleEditTestimonial(t)}
-                        title="Edit"
+                        onClick={() => handleEditTestimonial(tItem)}
+                        title={t('common.edit')}
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
                         className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
-                        onClick={() => { if (confirm('Delete this testimonial?')) deleteTestimonialMutation.mutate(t.id); }}
-                        title="Delete"
+                        onClick={() => { if (confirm(t('marketing.deleteTestimonial'))) deleteTestimonialMutation.mutate(tItem.id); }}
+                        title={t('common.delete')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 mt-3 italic">"{t.content}"</p>
-                  {t.productType && (
+                  <p className="text-sm text-gray-600 mt-3 italic">"{tItem.content}"</p>
+                  {tItem.productType && (
                     <div className="mt-3">
-                      <Badge variant="default">{t.productType}</Badge>
+                      <Badge variant="default">{tItem.productType}</Badge>
                     </div>
                   )}
                 </CardBody>
@@ -301,67 +303,67 @@ export default function MarketingPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Marketing & Growth</h1>
-        <p className="text-sm text-gray-500 mt-1">Manage demo farms and customer testimonials</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('marketing.title')}</h1>
+        <p className="text-sm text-gray-500 mt-1">{t('marketing.subtitle')}</p>
       </div>
 
       <Tabs tabs={[
-        { id: 'demo-farms', label: 'Demo Farms', icon: <Sprout size={16} />, content: demoFarmsTab },
-        { id: 'testimonials', label: 'Testimonials', icon: <MessageSquareQuote size={16} />, content: testimonialsTab },
+        { id: 'demo-farms', label: t('marketing.demoFarmsTab'), icon: <Sprout size={16} />, content: demoFarmsTab },
+        { id: 'testimonials', label: t('marketing.testimonialsTab'), icon: <MessageSquareQuote size={16} />, content: testimonialsTab },
       ]} />
 
       {/* Add/Edit Demo Farm Modal */}
-      <Modal isOpen={showFarmModal} onClose={closeFarmModal} title={editingFarm ? 'Edit Demo Farm' : 'Add Demo Farm'} size="lg">
+      <Modal isOpen={showFarmModal} onClose={closeFarmModal} title={editingFarm ? t('marketing.editDemoFarm') : t('marketing.addDemoFarm')} size="lg">
         <form onSubmit={handleFarmSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Farm Name" value={farmForm.farmName} onChange={(e) => setFarmForm({ ...farmForm, farmName: e.target.value })} required />
-            <Input label="Farmer Name" value={farmForm.farmerName} onChange={(e) => setFarmForm({ ...farmForm, farmerName: e.target.value })} required />
+            <Input label={t('marketing.farmName')} value={farmForm.farmName} onChange={(e) => setFarmForm({ ...farmForm, farmName: e.target.value })} required />
+            <Input label={t('marketing.farmerName')} value={farmForm.farmerName} onChange={(e) => setFarmForm({ ...farmForm, farmerName: e.target.value })} required />
           </div>
           <div className="grid grid-cols-3 gap-4">
-            <Input label="Location" value={farmForm.location} onChange={(e) => setFarmForm({ ...farmForm, location: e.target.value })} />
-            <Input label="District" value={farmForm.district} onChange={(e) => setFarmForm({ ...farmForm, district: e.target.value })} />
-            <Input label="State" value={farmForm.state} onChange={(e) => setFarmForm({ ...farmForm, state: e.target.value })} />
+            <Input label={t('ponds.location')} value={farmForm.location} onChange={(e) => setFarmForm({ ...farmForm, location: e.target.value })} />
+            <Input label={t('marketing.district')} value={farmForm.district} onChange={(e) => setFarmForm({ ...farmForm, district: e.target.value })} />
+            <Input label={t('marketing.state')} value={farmForm.state} onChange={(e) => setFarmForm({ ...farmForm, state: e.target.value })} />
           </div>
           <div className="grid grid-cols-3 gap-4">
-            <Input label="Trial Start" type="date" value={farmForm.trialStartDate} onChange={(e) => setFarmForm({ ...farmForm, trialStartDate: e.target.value })} />
-            <Input label="Trial End" type="date" value={farmForm.trialEndDate} onChange={(e) => setFarmForm({ ...farmForm, trialEndDate: e.target.value })} />
-            <Input label="Pond Size (sq ft)" type="number" value={farmForm.pondSize} onChange={(e) => setFarmForm({ ...farmForm, pondSize: e.target.value })} />
+            <Input label={t('marketing.trialStart')} type="date" value={farmForm.trialStartDate} onChange={(e) => setFarmForm({ ...farmForm, trialStartDate: e.target.value })} />
+            <Input label={t('marketing.trialEnd')} type="date" value={farmForm.trialEndDate} onChange={(e) => setFarmForm({ ...farmForm, trialEndDate: e.target.value })} />
+            <Input label={t('marketing.pondSize')} type="number" value={farmForm.pondSize} onChange={(e) => setFarmForm({ ...farmForm, pondSize: e.target.value })} />
           </div>
-          <Input label="Notes" value={farmForm.notes} onChange={(e) => setFarmForm({ ...farmForm, notes: e.target.value })} placeholder="Additional notes..." />
+          <Input label={t('common.notes')} value={farmForm.notes} onChange={(e) => setFarmForm({ ...farmForm, notes: e.target.value })} placeholder={t('leads.additionalNotes')} />
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="secondary" type="button" onClick={closeFarmModal}>Cancel</Button>
+            <Button variant="secondary" type="button" onClick={closeFarmModal}>{t('common.cancel')}</Button>
             <Button type="submit" loading={createFarmMutation.isPending || updateFarmMutation.isPending}>
-              {editingFarm ? 'Update Farm' : 'Add Farm'}
+              {editingFarm ? t('common.update') : t('common.add')}
             </Button>
           </div>
         </form>
       </Modal>
 
       {/* Add/Edit Testimonial Modal */}
-      <Modal isOpen={showTestimonialModal} onClose={closeTestimonialModal} title={editingTestimonial ? 'Edit Testimonial' : 'Add Testimonial'}>
+      <Modal isOpen={showTestimonialModal} onClose={closeTestimonialModal} title={editingTestimonial ? t('marketing.editTestimonial') : t('marketing.addTestimonial')}>
         <form onSubmit={handleTestimonialSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Customer Name" value={testimonialForm.customerName} onChange={(e) => setTestimonialForm({ ...testimonialForm, customerName: e.target.value })} required />
-            <Input label="Company" value={testimonialForm.company} onChange={(e) => setTestimonialForm({ ...testimonialForm, company: e.target.value })} />
+            <Input label={t('marketing.customerName')} value={testimonialForm.customerName} onChange={(e) => setTestimonialForm({ ...testimonialForm, customerName: e.target.value })} required />
+            <Input label={t('customers.company')} value={testimonialForm.company} onChange={(e) => setTestimonialForm({ ...testimonialForm, company: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Select label="Rating" options={[{ value: '5', label: '5 Stars' }, { value: '4', label: '4 Stars' }, { value: '3', label: '3 Stars' }, { value: '2', label: '2 Stars' }, { value: '1', label: '1 Star' }]} value={testimonialForm.rating} onChange={(e) => setTestimonialForm({ ...testimonialForm, rating: e.target.value })} />
-            <Select label="Product Type" options={[{ value: 'powder', label: 'Powder' }, { value: 'tablets', label: 'Tablets' }, { value: 'capsules', label: 'Capsules' }, { value: 'general', label: 'General' }]} value={testimonialForm.productType} onChange={(e) => setTestimonialForm({ ...testimonialForm, productType: e.target.value })} />
+            <Select label={t('marketing.rating')} options={[{ value: '5', label: `5 ${t('marketing.stars')}` }, { value: '4', label: `4 ${t('marketing.stars')}` }, { value: '3', label: `3 ${t('marketing.stars')}` }, { value: '2', label: `2 ${t('marketing.stars')}` }, { value: '1', label: `1 ${t('marketing.stars')}` }]} value={testimonialForm.rating} onChange={(e) => setTestimonialForm({ ...testimonialForm, rating: e.target.value })} />
+            <Select label={t('inventory.productType')} options={[{ value: 'powder', label: t('inventory.powderProduct') }, { value: 'tablets', label: t('inventory.tablets') }, { value: 'capsules', label: t('inventory.capsules') }, { value: 'general', label: 'General' }]} value={testimonialForm.productType} onChange={(e) => setTestimonialForm({ ...testimonialForm, productType: e.target.value })} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Testimonial</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('marketing.testimonialText')}</label>
             <textarea
               className="input-field min-h-[100px]"
               value={testimonialForm.content}
               onChange={(e) => setTestimonialForm({ ...testimonialForm, content: e.target.value })}
               required
-              placeholder="Customer's testimonial..."
+              placeholder={t('marketing.testimonialText')}
             />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="secondary" type="button" onClick={closeTestimonialModal}>Cancel</Button>
+            <Button variant="secondary" type="button" onClick={closeTestimonialModal}>{t('common.cancel')}</Button>
             <Button type="submit" loading={createTestimonialMutation.isPending || updateTestimonialMutation.isPending}>
-              {editingTestimonial ? 'Update Testimonial' : 'Add Testimonial'}
+              {editingTestimonial ? t('common.update') : t('common.add')}
             </Button>
           </div>
         </form>

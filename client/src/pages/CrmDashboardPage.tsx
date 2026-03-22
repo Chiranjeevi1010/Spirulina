@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Target, Mail, Phone, Users, Clock, Search } from 'lucide-react';
 import { Card, CardBody, PageLoader } from '../components/ui';
@@ -5,6 +6,7 @@ import { crmDashboardApi, callTrackerApi } from '../services/modules.api';
 import { Link } from 'react-router-dom';
 
 export default function CrmDashboardPage() {
+  const { t } = useTranslation();
   const { data: summary, isLoading } = useQuery({
     queryKey: ['crm-dashboard'],
     queryFn: () => crmDashboardApi.getSummary(),
@@ -23,33 +25,33 @@ export default function CrmDashboardPage() {
 
   const stats = [
     {
-      label: 'Extracted Leads (Pending)',
+      label: t('crm.extractedLeadsPending'),
       value: s?.extractedLeadsPending ?? 0,
-      sub: `${s?.extractedToday ?? 0} extracted today`,
+      sub: `${s?.extractedToday ?? 0} ${t('crm.extractedToday').toLowerCase()}`,
       icon: <Search size={24} />,
       color: 'bg-purple-50 text-purple-700',
       link: '/crm/extracted-leads',
     },
     {
-      label: 'Emails Sent Today',
+      label: t('crm.emailsSentToday'),
       value: `${s?.emailsSentToday ?? 0} / ${s?.emailDailyLimit ?? 20}`,
-      sub: `${Math.max(0, (s?.emailDailyLimit ?? 20) - (s?.emailsSentToday ?? 0))} remaining`,
+      sub: `${Math.max(0, (s?.emailDailyLimit ?? 20) - (s?.emailsSentToday ?? 0))} ${t('emailModule.remainingToday').toLowerCase()}`,
       icon: <Mail size={24} />,
       color: 'bg-blue-50 text-blue-700',
       link: '/crm/email',
     },
     {
-      label: 'Calls Made Today',
+      label: t('crm.callsMadeToday'),
       value: `${s?.callsMadeToday ?? 0} / ${s?.callDailyTarget ?? 20}`,
-      sub: `${Math.max(0, (s?.callDailyTarget ?? 20) - (s?.callsMadeToday ?? 0))} remaining`,
+      sub: `${Math.max(0, (s?.callDailyTarget ?? 20) - (s?.callsMadeToday ?? 0))} ${t('callTracker.remainingCalls').toLowerCase()}`,
       icon: <Phone size={24} />,
       color: 'bg-green-50 text-green-700',
       link: '/crm/call-tracker',
     },
     {
-      label: 'Pending Follow-ups',
+      label: t('crm.pendingFollowUps'),
       value: s?.pendingFollowUps ?? 0,
-      sub: 'Due today or overdue',
+      sub: t('crm.dueToday'),
       icon: <Clock size={24} />,
       color: 'bg-orange-50 text-orange-700',
       link: '/crm/call-tracker',
@@ -60,8 +62,8 @@ export default function CrmDashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">CRM Dashboard</h1>
-          <p className="text-sm text-gray-500">Manage leads, emails, and calls</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('crm.dashboardTitle')}</h1>
+          <p className="text-sm text-gray-500">{t('crm.dashboardSubtitle')}</p>
         </div>
       </div>
 
@@ -93,7 +95,7 @@ export default function CrmDashboardPage() {
           <CardBody>
             <div className="flex items-center gap-2 mb-4">
               <Users size={20} className="text-gray-600" />
-              <h2 className="text-lg font-semibold">Lead Pipeline</h2>
+              <h2 className="text-lg font-semibold">{t('crm.leadPipeline')}</h2>
             </div>
             <div className="space-y-2">
               {(s?.leadPipeline || []).map((p: any) => (
@@ -103,7 +105,7 @@ export default function CrmDashboardPage() {
                 </div>
               ))}
               {(!s?.leadPipeline || s.leadPipeline.length === 0) && (
-                <p className="text-sm text-gray-400 py-4 text-center">No leads yet</p>
+                <p className="text-sm text-gray-400 py-4 text-center">{t('crm.noLeadsYet')}</p>
               )}
             </div>
           </CardBody>
@@ -114,7 +116,7 @@ export default function CrmDashboardPage() {
           <CardBody>
             <div className="flex items-center gap-2 mb-4">
               <Clock size={20} className="text-orange-600" />
-              <h2 className="text-lg font-semibold">Pending Follow-ups</h2>
+              <h2 className="text-lg font-semibold">{t('crm.pendingFollowUps')}</h2>
             </div>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {fups.slice(0, 10).map((f: any) => (
@@ -129,7 +131,7 @@ export default function CrmDashboardPage() {
                 </div>
               ))}
               {fups.length === 0 && (
-                <p className="text-sm text-gray-400 py-4 text-center">No pending follow-ups</p>
+                <p className="text-sm text-gray-400 py-4 text-center">{t('crm.noPendingFollowUps')}</p>
               )}
             </div>
           </CardBody>
@@ -139,19 +141,19 @@ export default function CrmDashboardPage() {
       {/* Quick Actions */}
       <Card>
         <CardBody>
-          <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('crm.quickActions')}</h2>
           <div className="flex flex-wrap gap-3">
             <Link to="/crm/extracted-leads" className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium flex items-center gap-2">
-              <Search size={16} /> Review Extracted Leads
+              <Search size={16} /> {t('crm.reviewExtractedLeads')}
             </Link>
             <Link to="/crm/email" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2">
-              <Mail size={16} /> Send Email
+              <Mail size={16} /> {t('crm.sendEmail')}
             </Link>
             <Link to="/crm/call-tracker" className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2">
-              <Phone size={16} /> Log Call
+              <Phone size={16} /> {t('crm.logCall')}
             </Link>
             <Link to="/leads" className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium flex items-center gap-2">
-              <Target size={16} /> View All Leads
+              <Target size={16} /> {t('crm.viewAllLeads')}
             </Link>
           </div>
         </CardBody>

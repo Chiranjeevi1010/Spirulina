@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Plus, Scissors, Calendar, Pencil, Trash2 } from 'lucide-react';
@@ -7,6 +8,7 @@ import { harvestApi } from '../services/modules.api';
 import { pondsApi } from '../services/ponds.api';
 
 export default function HarvestPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [startDate, setStartDate] = useState('');
@@ -46,35 +48,35 @@ export default function HarvestPage() {
   const createMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => harvestApi.create(data),
     onSuccess: () => {
-      toast.success('Harvest record added');
+      toast.success(t('harvest.harvestAdded'));
       queryClient.invalidateQueries({ queryKey: ['harvests'] });
       queryClient.invalidateQueries({ queryKey: ['harvest-stats'] });
       setShowModal(false);
       resetForm();
     },
-    onError: () => toast.error('Failed to add harvest record'),
+    onError: () => toast.error(t('harvest.harvestAddFailed')),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => harvestApi.update(id, data),
     onSuccess: () => {
-      toast.success('Harvest record updated');
+      toast.success(t('harvest.harvestUpdated'));
       queryClient.invalidateQueries({ queryKey: ['harvests'] });
       queryClient.invalidateQueries({ queryKey: ['harvest-stats'] });
       setShowModal(false);
       resetForm();
     },
-    onError: () => toast.error('Failed to update harvest record'),
+    onError: () => toast.error(t('harvest.harvestUpdateFailed')),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => harvestApi.delete(id),
     onSuccess: () => {
-      toast.success('Harvest record deleted');
+      toast.success(t('harvest.harvestDeleted'));
       queryClient.invalidateQueries({ queryKey: ['harvests'] });
       queryClient.invalidateQueries({ queryKey: ['harvest-stats'] });
     },
-    onError: () => toast.error('Failed to delete harvest record'),
+    onError: () => toast.error(t('harvest.harvestDeleteFailed')),
   });
 
   const resetForm = () => {
@@ -128,38 +130,38 @@ export default function HarvestPage() {
   const columns = [
     {
       key: 'harvestDate',
-      header: 'Date',
+      header: t('common.date'),
       render: (item: any) => new Date(item.harvestDate).toLocaleDateString(),
     },
     {
       key: 'pondId',
-      header: 'Pond',
+      header: t('harvest.pond'),
       render: (item: any) => item.pond?.name || `Pond #${item.pondId}`,
     },
     {
       key: 'wetHarvestKg',
-      header: 'Wet Harvest (kg)',
+      header: t('harvest.wetHarvestKg'),
       render: (item: any) => Number(item.wetHarvestKg).toFixed(2),
     },
     {
       key: 'solidsPercentage',
-      header: 'Solids %',
+      header: t('harvest.solidsPercent'),
       render: (item: any) => item.solidsPercentage ? `${Number(item.solidsPercentage).toFixed(1)}%` : '-',
     },
     {
       key: 'harvestMethod',
-      header: 'Method',
+      header: t('harvest.method'),
       render: (item: any) => (
         <span className="capitalize">{item.harvestMethod || '-'}</span>
       ),
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('common.actions'),
       render: (item: any) => (
         <div className="flex gap-1">
           <Button size="sm" variant="ghost" icon={<Pencil className="w-3 h-3" />} onClick={(e) => { e.stopPropagation(); handleEdit(item); }} />
-          <Button size="sm" variant="ghost" icon={<Trash2 className="w-3 h-3 text-red-500" />} onClick={(e) => { e.stopPropagation(); if (confirm('Delete this harvest record?')) deleteMutation.mutate(item.id); }} />
+          <Button size="sm" variant="ghost" icon={<Trash2 className="w-3 h-3 text-red-500" />} onClick={(e) => { e.stopPropagation(); if (confirm(t('harvest.harvestDeleted'))) deleteMutation.mutate(item.id); }} />
         </div>
       ),
     },
@@ -174,20 +176,20 @@ export default function HarvestPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Harvest Management</h1>
-          <p className="text-sm text-gray-500 mt-1">Track and manage spirulina harvests</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('harvest.title')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('harvest.subtitle')}</p>
         </div>
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => { resetForm(); setShowModal(true); }}>
-          Add Harvest
+          {t('harvest.addHarvest')}
         </Button>
       </div>
 
       {/* Stats */}
       {stats != null && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <StatsCard title="Total Harvests" value={String((stats as Record<string, unknown>).harvestCount ?? 0)} icon={<Scissors className="w-5 h-5" />} />
-          <StatsCard title="Total Wet Harvest" value={`${Number((stats as Record<string, unknown>).totalWetHarvestKg ?? 0).toFixed(1)} kg`} icon={<Scissors className="w-5 h-5" />} />
-          <StatsCard title="Avg per Harvest" value={`${Number((stats as Record<string, unknown>).avgWetPerHarvest ?? 0).toFixed(1)} kg`} icon={<Scissors className="w-5 h-5" />} />
+          <StatsCard title={t('harvest.totalHarvests')} value={String((stats as Record<string, unknown>).harvestCount ?? 0)} icon={<Scissors className="w-5 h-5" />} />
+          <StatsCard title={t('harvest.totalWetHarvest')} value={`${Number((stats as Record<string, unknown>).totalWetHarvestKg ?? 0).toFixed(1)} kg`} icon={<Scissors className="w-5 h-5" />} />
+          <StatsCard title={t('harvest.avgPerHarvest')} value={`${Number((stats as Record<string, unknown>).avgWetPerHarvest ?? 0).toFixed(1)} kg`} icon={<Scissors className="w-5 h-5" />} />
         </div>
       )}
 
@@ -196,13 +198,13 @@ export default function HarvestPage() {
         <CardBody>
           <div className="flex flex-col sm:flex-row gap-3 items-end">
             <Input
-              label="Start Date"
+              label={t('harvest.startDate')}
               type="date"
               value={startDate}
               onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
             />
             <Input
-              label="End Date"
+              label={t('harvest.endDate')}
               type="date"
               value={endDate}
               onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
@@ -211,7 +213,7 @@ export default function HarvestPage() {
               variant="secondary"
               onClick={() => { setStartDate(''); setEndDate(''); setPage(1); }}
             >
-              Clear
+              {t('common.clear')}
             </Button>
           </div>
         </CardBody>
@@ -223,9 +225,9 @@ export default function HarvestPage() {
       ) : harvests.length === 0 ? (
         <EmptyState
           icon={<Scissors size={48} />}
-          title="No harvests found"
-          description="Start by adding your first harvest record"
-          action={<Button onClick={() => setShowModal(true)}>Add Harvest</Button>}
+          title={t('harvest.noHarvests')}
+          description={t('harvest.addFirstHarvest')}
+          action={<Button onClick={() => setShowModal(true)}>{t('harvest.addHarvest')}</Button>}
         />
       ) : (
         <Card>
@@ -241,18 +243,18 @@ export default function HarvestPage() {
       )}
 
       {/* Add Harvest Modal */}
-      <Modal isOpen={showModal} onClose={() => { setShowModal(false); resetForm(); }} title={editingItem ? 'Edit Harvest Record' : 'Add Harvest Record'} size="lg">
+      <Modal isOpen={showModal} onClose={() => { setShowModal(false); resetForm(); }} title={editingItem ? t('harvest.editHarvestRecord') : t('harvest.addHarvestRecord')} size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
           <Select
-            label="Pond"
+            label={t('harvest.pond')}
             options={pondOptions}
-            placeholder="Select pond"
+            placeholder={t('harvest.pond')}
             value={form.pondId}
             onChange={(e) => setForm({ ...form, pondId: e.target.value })}
             required
           />
           <Input
-            label="Harvest Date"
+            label={t('harvest.harvestDate')}
             type="date"
             value={form.harvestDate}
             onChange={(e) => setForm({ ...form, harvestDate: e.target.value })}
@@ -260,7 +262,7 @@ export default function HarvestPage() {
           />
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Wet Harvest (kg)"
+              label={t('harvest.wetHarvestKg')}
               type="number"
               step="0.01"
               value={form.wetHarvestKg}
@@ -268,7 +270,7 @@ export default function HarvestPage() {
               required
             />
             <Input
-              label="Solids %"
+              label={t('harvest.solidsPercent')}
               type="number"
               step="0.1"
               value={form.solidsPercentage}
@@ -277,35 +279,35 @@ export default function HarvestPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Dry Yield %"
+              label={t('harvest.dryYieldPercent')}
               type="number"
               step="0.1"
               value={form.dryYieldPercentage}
               onChange={(e) => setForm({ ...form, dryYieldPercentage: e.target.value })}
             />
             <Select
-              label="Harvest Method"
+              label={t('harvest.harvestMethod')}
               options={[
-                { value: 'filtration', label: 'Filtration' },
-                { value: 'centrifuge', label: 'Centrifuge' },
-                { value: 'gravity', label: 'Gravity' },
+                { value: 'filtration', label: t('harvest.filtration') },
+                { value: 'centrifuge', label: t('harvest.centrifuge') },
+                { value: 'gravity', label: t('harvest.gravity') },
               ]}
               value={form.harvestMethod}
               onChange={(e) => setForm({ ...form, harvestMethod: e.target.value })}
             />
           </div>
           <Input
-            label="Notes"
+            label={t('common.notes')}
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             placeholder="Optional notes..."
           />
           <div className="flex justify-end gap-3 pt-4">
             <Button variant="secondary" type="button" onClick={() => setShowModal(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" loading={createMutation.isPending || updateMutation.isPending}>
-              {editingItem ? 'Update Harvest' : 'Add Harvest'}
+              {editingItem ? t('common.update') : t('harvest.addHarvest')}
             </Button>
           </div>
         </form>

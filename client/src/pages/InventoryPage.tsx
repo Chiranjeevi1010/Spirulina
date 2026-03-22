@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -7,6 +8,7 @@ import { Button, Input, Select, Card, CardBody, CardTitle, DataTable, Modal, Tab
 import { inventoryApi, batchesApi } from '../services/modules.api';
 
 export default function InventoryPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [batchPage, setBatchPage] = useState(1);
@@ -40,19 +42,19 @@ export default function InventoryPage() {
   const createBatchMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => batchesApi.create(data),
     onSuccess: () => {
-      toast.success('Batch created');
+      toast.success(t('inventory.batchCreated'));
       queryClient.invalidateQueries({ queryKey: ['batches'] });
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       setShowBatchModal(false);
       resetBatchForm();
     },
-    onError: () => toast.error('Failed to create batch'),
+    onError: () => toast.error(t('inventory.batchCreateFailed')),
   });
 
   const updateBatchMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => batchesApi.update(id, data),
     onSuccess: () => {
-      toast.success('Batch updated');
+      toast.success(t('inventory.batchUpdated'));
       queryClient.invalidateQueries({ queryKey: ['batches'] });
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       queryClient.invalidateQueries({ queryKey: ['batches-expiring'] });
@@ -60,18 +62,18 @@ export default function InventoryPage() {
       setEditingItem(null);
       resetBatchForm();
     },
-    onError: () => toast.error('Failed to update batch'),
+    onError: () => toast.error(t('inventory.batchUpdateFailed')),
   });
 
   const deleteBatchMutation = useMutation({
     mutationFn: (id: number) => batchesApi.delete(id),
     onSuccess: () => {
-      toast.success('Batch deleted');
+      toast.success(t('inventory.batchDeleted'));
       queryClient.invalidateQueries({ queryKey: ['batches'] });
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       queryClient.invalidateQueries({ queryKey: ['batches-expiring'] });
     },
-    onError: () => toast.error('Failed to delete batch'),
+    onError: () => toast.error(t('inventory.batchDeleteFailed')),
   });
 
   const resetBatchForm = () => {
@@ -114,13 +116,13 @@ export default function InventoryPage() {
   const expiringList = (expiring as any[]) ?? [];
 
   const batchColumns = [
-    { key: 'batchNumber', header: 'Batch #' },
-    { key: 'productType', header: 'Product', render: (item: any) => <span className="capitalize">{item.productType}</span> },
-    { key: 'quantity', header: 'Quantity (kg)', render: (item: any) => Number(item.quantity).toFixed(2) },
-    { key: 'productionDate', header: 'Production Date', render: (item: any) => new Date(item.productionDate).toLocaleDateString() },
+    { key: 'batchNumber', header: t('inventory.batchNumber') },
+    { key: 'productType', header: t('inventory.product'), render: (item: any) => <span className="capitalize">{item.productType}</span> },
+    { key: 'quantity', header: t('inventory.quantity'), render: (item: any) => Number(item.quantity).toFixed(2) },
+    { key: 'productionDate', header: t('inventory.productionDate'), render: (item: any) => new Date(item.productionDate).toLocaleDateString() },
     {
       key: 'expiryDate',
-      header: 'Expiry Date',
+      header: t('inventory.expiryDate'),
       render: (item: any) => {
         if (!item.expiryDate) return '-';
         const expiry = new Date(item.expiryDate);
@@ -135,7 +137,7 @@ export default function InventoryPage() {
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('common.status'),
       render: (item: any) => {
         const v: Record<string, 'success' | 'warning' | 'danger' | 'default'> = {
           available: 'success', reserved: 'warning', sold: 'info' as any, expired: 'danger',
@@ -145,13 +147,13 @@ export default function InventoryPage() {
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('common.actions'),
       render: (item: any) => (
         <div className="flex gap-1">
-          <button onClick={(e) => { e.stopPropagation(); handleEditBatch(item); }} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="Edit">
+          <button onClick={(e) => { e.stopPropagation(); handleEditBatch(item); }} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title={t('common.edit')}>
             <Pencil className="w-4 h-4" />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); if (confirm('Delete this batch?')) deleteBatchMutation.mutate(item.id); }} className="p-1 text-red-600 hover:bg-red-50 rounded" title="Delete">
+          <button onClick={(e) => { e.stopPropagation(); if (confirm(t('inventory.deleteBatch'))) deleteBatchMutation.mutate(item.id); }} className="p-1 text-red-600 hover:bg-red-50 rounded" title={t('common.delete')}>
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -162,7 +164,7 @@ export default function InventoryPage() {
   const inventoryTab = (
     <div>
       {invLoading ? <PageLoader /> : inventoryList.length === 0 ? (
-        <EmptyState icon={<Package size={48} />} title="No inventory data" description="Inventory will populate as batches are created" />
+        <EmptyState icon={<Package size={48} />} title={t('inventory.noInventory')} description={t('inventory.inventoryPopulate')} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {inventoryList.map((item: any, idx: number) => (
@@ -192,11 +194,11 @@ export default function InventoryPage() {
     <div>
       <div className="flex justify-end mb-4">
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowBatchModal(true)}>
-          Add Batch
+          {t('inventory.addBatch')}
         </Button>
       </div>
       {batchesLoading ? <PageLoader /> : batches.length === 0 ? (
-        <EmptyState icon={<Package size={48} />} title="No batches" description="Create your first batch" action={<Button onClick={() => setShowBatchModal(true)}>Add Batch</Button>} />
+        <EmptyState icon={<Package size={48} />} title={t('inventory.noBatches')} description={t('inventory.createFirstBatch')} action={<Button onClick={() => setShowBatchModal(true)}>{t('inventory.addBatch')}</Button>} />
       ) : (
         <>
           <DataTable
@@ -215,7 +217,7 @@ export default function InventoryPage() {
   const expiringTab = (
     <div>
       {expiringLoading ? <PageLoader /> : expiringList.length === 0 ? (
-        <EmptyState icon={<Clock size={48} />} title="No expiring batches" description="No batches expiring within 30 days" />
+        <EmptyState icon={<Clock size={48} />} title={t('inventory.noExpiringBatches')} description={t('inventory.noExpiringMsg')} />
       ) : (
         <div className="space-y-3">
           {expiringList.map((batch: any) => {
@@ -230,10 +232,10 @@ export default function InventoryPage() {
                     </div>
                     <div className="text-right">
                       <Badge variant={daysLeft <= 7 ? 'danger' : 'warning'}>
-                        {daysLeft <= 0 ? 'Expired' : `${daysLeft} days left`}
+                        {daysLeft <= 0 ? t('inventory.expired') : `${daysLeft} ${t('inventory.daysLeft')}`}
                       </Badge>
                       <p className="text-xs text-gray-400 mt-1">
-                        Expires: {new Date(batch.expiryDate).toLocaleDateString()}
+                        {t('inventory.expires')}: {new Date(batch.expiryDate).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -249,39 +251,39 @@ export default function InventoryPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Inventory & Batch Management</h1>
-        <p className="text-sm text-gray-500 mt-1">Track products, batches, and expiry dates</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('inventory.title')}</h1>
+        <p className="text-sm text-gray-500 mt-1">{t('inventory.subtitle')}</p>
       </div>
 
       <Tabs tabs={[
-        { id: 'inventory', label: 'Inventory', icon: <Package size={16} />, content: inventoryTab },
-        { id: 'batches', label: 'Batches', icon: <Package size={16} />, content: batchesTab },
-        { id: 'expiring', label: 'Expiring', icon: <AlertTriangle size={16} />, content: expiringTab },
+        { id: 'inventory', label: t('inventory.inventoryTab'), icon: <Package size={16} />, content: inventoryTab },
+        { id: 'batches', label: t('inventory.batchesTab'), icon: <Package size={16} />, content: batchesTab },
+        { id: 'expiring', label: t('inventory.expiringTab'), icon: <AlertTriangle size={16} />, content: expiringTab },
       ]} />
 
       {/* Add/Edit Batch Modal */}
-      <Modal isOpen={showBatchModal} onClose={() => { setShowBatchModal(false); setEditingItem(null); resetBatchForm(); }} title={editingItem ? 'Edit Batch' : 'Add Batch'}>
+      <Modal isOpen={showBatchModal} onClose={() => { setShowBatchModal(false); setEditingItem(null); resetBatchForm(); }} title={editingItem ? t('inventory.editBatch') : t('inventory.addBatch')}>
         <form onSubmit={handleBatchSubmit} className="space-y-4">
-          <Input label="Batch Number" value={batchForm.batchNumber} onChange={(e) => setBatchForm({ ...batchForm, batchNumber: e.target.value })} required />
+          <Input label={t('inventory.batchNumber')} value={batchForm.batchNumber} onChange={(e) => setBatchForm({ ...batchForm, batchNumber: e.target.value })} required />
           <Select
-            label="Product Type"
+            label={t('inventory.productType')}
             options={[
-              { value: 'powder', label: 'Powder' },
-              { value: 'tablets', label: 'Tablets' },
-              { value: 'capsules', label: 'Capsules' },
-              { value: 'flakes', label: 'Flakes' },
-              { value: 'extract', label: 'Extract' },
+              { value: 'powder', label: t('inventory.powderProduct') },
+              { value: 'tablets', label: t('inventory.tablets') },
+              { value: 'capsules', label: t('inventory.capsules') },
+              { value: 'flakes', label: t('inventory.flakes') },
+              { value: 'extract', label: t('inventory.extract') },
             ]}
             value={batchForm.productType}
             onChange={(e) => setBatchForm({ ...batchForm, productType: e.target.value })}
           />
-          <Input label="Quantity (kg)" type="number" step="0.01" value={batchForm.quantity} onChange={(e) => setBatchForm({ ...batchForm, quantity: e.target.value })} required />
-          <Input label="Production Date" type="date" value={batchForm.productionDate} onChange={(e) => setBatchForm({ ...batchForm, productionDate: e.target.value })} required />
-          <Input label="Expiry Date" type="date" value={batchForm.expiryDate} onChange={(e) => setBatchForm({ ...batchForm, expiryDate: e.target.value })} />
-          <Input label="Notes" value={batchForm.notes} onChange={(e) => setBatchForm({ ...batchForm, notes: e.target.value })} placeholder="Optional notes..." />
+          <Input label={t('inventory.quantity')} type="number" step="0.01" value={batchForm.quantity} onChange={(e) => setBatchForm({ ...batchForm, quantity: e.target.value })} required />
+          <Input label={t('inventory.productionDate')} type="date" value={batchForm.productionDate} onChange={(e) => setBatchForm({ ...batchForm, productionDate: e.target.value })} required />
+          <Input label={t('inventory.expiryDate')} type="date" value={batchForm.expiryDate} onChange={(e) => setBatchForm({ ...batchForm, expiryDate: e.target.value })} />
+          <Input label={t('common.notes')} value={batchForm.notes} onChange={(e) => setBatchForm({ ...batchForm, notes: e.target.value })} placeholder="Optional notes..." />
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="secondary" type="button" onClick={() => { setShowBatchModal(false); setEditingItem(null); resetBatchForm(); }}>Cancel</Button>
-            <Button type="submit" loading={createBatchMutation.isPending || updateBatchMutation.isPending}>{editingItem ? 'Update Batch' : 'Create Batch'}</Button>
+            <Button variant="secondary" type="button" onClick={() => { setShowBatchModal(false); setEditingItem(null); resetBatchForm(); }}>{t('common.cancel')}</Button>
+            <Button type="submit" loading={createBatchMutation.isPending || updateBatchMutation.isPending}>{editingItem ? t('common.update') : t('common.create')}</Button>
           </div>
         </form>
       </Modal>

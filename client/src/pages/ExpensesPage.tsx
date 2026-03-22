@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Plus, IndianRupee, Check, X, Pencil, Trash2 } from 'lucide-react';
@@ -6,6 +7,7 @@ import { Button, Input, Select, Card, CardBody, DataTable, Modal, Pagination, Pa
 import { expensesApi } from '../services/modules.api';
 
 export default function ExpensesPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState('');
@@ -38,50 +40,50 @@ export default function ExpensesPage() {
   const createMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => expensesApi.create(data),
     onSuccess: () => {
-      toast.success('Expense added');
+      toast.success(t('expenses.expenseAdded'));
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       setShowModal(false);
       resetForm();
     },
-    onError: () => toast.error('Failed to add expense'),
+    onError: () => toast.error(t('expenses.expenseAddFailed')),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => expensesApi.update(id, data),
     onSuccess: () => {
-      toast.success('Expense updated');
+      toast.success(t('expenses.expenseUpdated'));
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       setShowModal(false);
       resetForm();
     },
-    onError: () => toast.error('Failed to update expense'),
+    onError: () => toast.error(t('expenses.expenseUpdateFailed')),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => expensesApi.delete(id),
     onSuccess: () => {
-      toast.success('Expense deleted');
+      toast.success(t('expenses.expenseDeleted'));
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
     },
-    onError: () => toast.error('Failed to delete expense'),
+    onError: () => toast.error(t('expenses.expenseDeleteFailed')),
   });
 
   const approveMutation = useMutation({
     mutationFn: (id: number) => expensesApi.approve(id),
     onSuccess: () => {
-      toast.success('Expense approved');
+      toast.success(t('expenses.expenseApproved'));
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
     },
-    onError: () => toast.error('Failed to approve expense'),
+    onError: () => toast.error(t('expenses.expenseApproveFailed')),
   });
 
   const rejectMutation = useMutation({
     mutationFn: (id: number) => expensesApi.reject(id),
     onSuccess: () => {
-      toast.success('Expense rejected');
+      toast.success(t('expenses.expenseRejected'));
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
     },
-    onError: () => toast.error('Failed to reject expense'),
+    onError: () => toast.error(t('expenses.expenseRejectFailed')),
   });
 
   const resetForm = () => {
@@ -131,16 +133,27 @@ export default function ExpensesPage() {
     return <Badge variant={variants[s] || 'default'}>{s}</Badge>;
   };
 
+  const categoryOptions = [
+    { value: 'operations', label: t('expenses.operations') },
+    { value: 'chemicals', label: t('chemicals.chemicalsTab') },
+    { value: 'equipment', label: t('expenses.equipmentCat') },
+    { value: 'labor', label: t('expenses.labor') },
+    { value: 'utilities', label: t('expenses.utilities') },
+    { value: 'marketing', label: t('expenses.marketingCat') },
+    { value: 'logistics', label: t('expenses.logistics') },
+    { value: 'other', label: t('expenses.otherCat') },
+  ];
+
   const columns = [
-    { key: 'date', header: 'Date', render: (item: any) => new Date(item.date || item.createdAt).toLocaleDateString() },
-    { key: 'description', header: 'Description' },
-    { key: 'category', header: 'Category', render: (item: any) => <span className="capitalize">{item.category}</span> },
-    { key: 'amount', header: 'Amount', render: (item: any) => `₹${Number(item.amount).toLocaleString()}` },
-    { key: 'vendor', header: 'Vendor', render: (item: any) => item.vendor || '-' },
-    { key: 'status', header: 'Status', render: (item: any) => statusBadge(item.status || 'pending') },
+    { key: 'date', header: t('common.date'), render: (item: any) => new Date(item.date || item.createdAt).toLocaleDateString() },
+    { key: 'description', header: t('common.description') },
+    { key: 'category', header: t('common.category'), render: (item: any) => <span className="capitalize">{item.category}</span> },
+    { key: 'amount', header: t('common.amount'), render: (item: any) => `₹${Number(item.amount).toLocaleString()}` },
+    { key: 'vendor', header: t('expenses.vendor'), render: (item: any) => item.vendor || '-' },
+    { key: 'status', header: t('common.status'), render: (item: any) => statusBadge(item.status || 'pending') },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('common.actions'),
       render: (item: any) => (
         <div className="flex gap-1">
           {item.status === 'pending' && (
@@ -150,32 +163,21 @@ export default function ExpensesPage() {
             </>
           )}
           <Button size="sm" variant="ghost" icon={<Pencil className="w-3 h-3" />} onClick={(e) => { e.stopPropagation(); handleEdit(item); }} />
-          <Button size="sm" variant="ghost" icon={<Trash2 className="w-3 h-3 text-red-500" />} onClick={(e) => { e.stopPropagation(); if (confirm('Delete this expense?')) deleteMutation.mutate(item.id); }} />
+          <Button size="sm" variant="ghost" icon={<Trash2 className="w-3 h-3 text-red-500" />} onClick={(e) => { e.stopPropagation(); if (confirm(t('expenses.deleteExpense'))) deleteMutation.mutate(item.id); }} />
         </div>
       ),
     },
-  ];
-
-  const categoryOptions = [
-    { value: 'operations', label: 'Operations' },
-    { value: 'chemicals', label: 'Chemicals' },
-    { value: 'equipment', label: 'Equipment' },
-    { value: 'labor', label: 'Labor' },
-    { value: 'utilities', label: 'Utilities' },
-    { value: 'marketing', label: 'Marketing' },
-    { value: 'logistics', label: 'Logistics' },
-    { value: 'other', label: 'Other' },
   ];
 
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Expense Management</h1>
-          <p className="text-sm text-gray-500 mt-1">Track and manage all expenses</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('expenses.title')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('expenses.subtitle')}</p>
         </div>
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => { resetForm(); setShowModal(true); }}>
-          Add Expense
+          {t('expenses.addExpense')}
         </Button>
       </div>
 
@@ -184,27 +186,27 @@ export default function ExpensesPage() {
         <CardBody>
           <div className="flex flex-col sm:flex-row gap-3 items-end">
             <Select
-              label="Category"
+              label={t('common.category')}
               options={categoryOptions}
-              placeholder="All Categories"
+              placeholder={t('expenses.allCategories')}
               value={category}
               onChange={(e) => { setCategory(e.target.value); setPage(1); }}
             />
             <Select
-              label="Status"
+              label={t('common.status')}
               options={[
-                { value: 'pending', label: 'Pending' },
-                { value: 'approved', label: 'Approved' },
-                { value: 'rejected', label: 'Rejected' },
+                { value: 'pending', label: t('common.pending') },
+                { value: 'approved', label: t('common.approved') },
+                { value: 'rejected', label: t('common.rejected') },
               ]}
-              placeholder="All Status"
+              placeholder={t('expenses.allStatus')}
               value={status}
               onChange={(e) => { setStatus(e.target.value); setPage(1); }}
             />
-            <Input label="Start Date" type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPage(1); }} />
-            <Input label="End Date" type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); setPage(1); }} />
+            <Input label={t('harvest.startDate')} type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPage(1); }} />
+            <Input label={t('harvest.endDate')} type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); setPage(1); }} />
             <Button variant="secondary" onClick={() => { setCategory(''); setStatus(''); setStartDate(''); setEndDate(''); setPage(1); }}>
-              Clear
+              {t('common.clear')}
             </Button>
           </div>
         </CardBody>
@@ -216,9 +218,9 @@ export default function ExpensesPage() {
       ) : expenses.length === 0 ? (
         <EmptyState
           icon={<IndianRupee size={48} />}
-          title="No expenses found"
-          description="Start tracking your expenses"
-          action={<Button onClick={() => setShowModal(true)}>Add Expense</Button>}
+          title={t('expenses.noExpenses')}
+          description={t('expenses.startTracking')}
+          action={<Button onClick={() => setShowModal(true)}>{t('expenses.addExpense')}</Button>}
         />
       ) : (
         <Card>
@@ -234,19 +236,19 @@ export default function ExpensesPage() {
       )}
 
       {/* Add Expense Modal */}
-      <Modal isOpen={showModal} onClose={() => { setShowModal(false); resetForm(); }} title={editingItem ? 'Edit Expense' : 'Add Expense'} size="lg">
+      <Modal isOpen={showModal} onClose={() => { setShowModal(false); resetForm(); }} title={editingItem ? t('expenses.editExpense') : t('expenses.addExpense')} size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
-          <Input label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+          <Input label={t('common.date')} type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
+          <Input label={t('common.description')} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
           <div className="grid grid-cols-2 gap-4">
-            <Select label="Category" options={categoryOptions} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
-            <Input label="Amount (₹)" type="number" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required />
+            <Select label={t('common.category')} options={categoryOptions} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+            <Input label={t('expenses.expenseAmount')} type="number" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required />
           </div>
-          <Input label="Vendor" value={form.vendor} onChange={(e) => setForm({ ...form, vendor: e.target.value })} />
-          <Input label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Optional notes..." />
+          <Input label={t('expenses.vendor')} value={form.vendor} onChange={(e) => setForm({ ...form, vendor: e.target.value })} />
+          <Input label={t('common.notes')} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Optional notes..." />
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="secondary" type="button" onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button type="submit" loading={createMutation.isPending || updateMutation.isPending}>{editingItem ? 'Update Expense' : 'Add Expense'}</Button>
+            <Button variant="secondary" type="button" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
+            <Button type="submit" loading={createMutation.isPending || updateMutation.isPending}>{editingItem ? t('common.update') : t('expenses.addExpense')}</Button>
           </div>
         </form>
       </Modal>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Plus, UserPlus, LayoutGrid, List, Pencil, Trash2 } from 'lucide-react';
@@ -18,6 +19,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; badge: 'default'
 };
 
 export default function LeadsPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [view, setView] = useState<'pipeline' | 'table'>('pipeline');
@@ -42,51 +44,51 @@ export default function LeadsPage() {
   const createMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => leadsApi.create(data),
     onSuccess: () => {
-      toast.success('Lead added');
+      toast.success(t('leads.leadAdded'));
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       setShowModal(false);
       resetForm();
     },
-    onError: () => toast.error('Failed to add lead'),
+    onError: () => toast.error(t('leads.leadAddFailed')),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => leadsApi.update(id, data),
     onSuccess: () => {
-      toast.success('Lead updated');
+      toast.success(t('leads.leadUpdated'));
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       setShowModal(false);
       setEditingItem(null);
       resetForm();
     },
-    onError: () => toast.error('Failed to update lead'),
+    onError: () => toast.error(t('leads.leadUpdateFailed')),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => leadsApi.delete(id),
     onSuccess: () => {
-      toast.success('Lead deleted');
+      toast.success(t('leads.leadDeleted'));
       queryClient.invalidateQueries({ queryKey: ['leads'] });
     },
-    onError: () => toast.error('Failed to delete lead'),
+    onError: () => toast.error(t('leads.leadDeleteFailed')),
   });
 
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => leadsApi.updateStatus(id, status),
     onSuccess: () => {
-      toast.success('Status updated');
+      toast.success(t('leads.leadUpdated'));
       queryClient.invalidateQueries({ queryKey: ['leads'] });
     },
-    onError: () => toast.error('Failed to update status'),
+    onError: () => toast.error(t('leads.leadUpdateFailed')),
   });
 
   const convertMutation = useMutation({
     mutationFn: (id: number) => leadsApi.convert(id),
     onSuccess: () => {
-      toast.success('Lead converted to customer');
+      toast.success(t('leads.leadConverted'));
       queryClient.invalidateQueries({ queryKey: ['leads'] });
     },
-    onError: () => toast.error('Failed to convert lead'),
+    onError: () => toast.error(t('leads.leadConvertFailed')),
   });
 
   const resetForm = () => {
@@ -128,13 +130,13 @@ export default function LeadsPage() {
   const leads = data?.data ?? [];
 
   const columns = [
-    { key: 'contactName', header: 'Contact' },
-    { key: 'companyName', header: 'Company', render: (item: any) => item.companyName || '-' },
-    { key: 'source', header: 'Source', render: (item: any) => <span className="capitalize">{item.source}</span> },
-    { key: 'estimatedValue', header: 'Value', render: (item: any) => item.estimatedValue ? `₹${Number(item.estimatedValue).toLocaleString()}` : '-' },
+    { key: 'contactName', header: t('leads.contact') },
+    { key: 'companyName', header: t('customers.company'), render: (item: any) => item.companyName || '-' },
+    { key: 'source', header: t('leads.source'), render: (item: any) => <span className="capitalize">{item.source}</span> },
+    { key: 'estimatedValue', header: t('leads.value'), render: (item: any) => item.estimatedValue ? `₹${Number(item.estimatedValue).toLocaleString()}` : '-' },
     {
       key: 'status',
-      header: 'Status',
+      header: t('common.status'),
       render: (item: any) => (
         <select
           value={item.status}
@@ -150,13 +152,13 @@ export default function LeadsPage() {
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('common.actions'),
       render: (item: any) => (
         <div className="flex gap-1">
-          <button onClick={(e) => { e.stopPropagation(); handleEdit(item); }} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="Edit">
+          <button onClick={(e) => { e.stopPropagation(); handleEdit(item); }} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title={t('common.edit')}>
             <Pencil className="w-4 h-4" />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); if (confirm('Delete this lead?')) deleteMutation.mutate(item.id); }} className="p-1 text-red-600 hover:bg-red-50 rounded" title="Delete">
+          <button onClick={(e) => { e.stopPropagation(); if (confirm(t('leads.deleteLead'))) deleteMutation.mutate(item.id); }} className="p-1 text-red-600 hover:bg-red-50 rounded" title={t('common.delete')}>
             <Trash2 className="w-4 h-4" />
           </button>
           {item.status !== 'won' && item.status !== 'lost' && (
@@ -166,7 +168,7 @@ export default function LeadsPage() {
               icon={<UserPlus className="w-3 h-3" />}
               onClick={(e) => { e.stopPropagation(); convertMutation.mutate(item.id); }}
             >
-              Convert
+              {t('leads.convert')}
             </Button>
           )}
         </div>
@@ -194,10 +196,10 @@ export default function LeadsPage() {
                       {lead.companyName && <p className="text-xs text-gray-500 truncate">{lead.companyName}</p>}
                     </div>
                     <div className="flex gap-0.5 ml-1">
-                      <button onClick={() => handleEdit(lead)} className="p-0.5 text-blue-600 hover:bg-blue-50 rounded" title="Edit">
+                      <button onClick={() => handleEdit(lead)} className="p-0.5 text-blue-600 hover:bg-blue-50 rounded" title={t('common.edit')}>
                         <Pencil className="w-3 h-3" />
                       </button>
-                      <button onClick={() => { if (confirm('Delete this lead?')) deleteMutation.mutate(lead.id); }} className="p-0.5 text-red-600 hover:bg-red-50 rounded" title="Delete">
+                      <button onClick={() => { if (confirm(t('leads.deleteLead'))) deleteMutation.mutate(lead.id); }} className="p-0.5 text-red-600 hover:bg-red-50 rounded" title={t('common.delete')}>
                         <Trash2 className="w-3 h-3" />
                       </button>
                     </div>
@@ -217,9 +219,9 @@ export default function LeadsPage() {
                       <button
                         onClick={() => convertMutation.mutate(lead.id)}
                         className="text-xs text-primary-600 hover:underline"
-                        title="Convert to Customer"
+                        title={t('leads.convert')}
                       >
-                        Convert
+                        {t('leads.convert')}
                       </button>
                     )}
                   </div>
@@ -236,8 +238,8 @@ export default function LeadsPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Sales Leads</h1>
-          <p className="text-sm text-gray-500 mt-1">Track and manage your sales pipeline</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('leads.title')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('leads.subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <div className="flex rounded-lg border border-gray-300 overflow-hidden">
@@ -255,7 +257,7 @@ export default function LeadsPage() {
             </button>
           </div>
           <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowModal(true)}>
-            Add Lead
+            {t('leads.addLead')}
           </Button>
         </div>
       </div>
@@ -265,9 +267,9 @@ export default function LeadsPage() {
       ) : leads.length === 0 ? (
         <EmptyState
           icon={<UserPlus size={48} />}
-          title="No leads yet"
-          description="Start building your sales pipeline"
-          action={<Button onClick={() => setShowModal(true)}>Add Lead</Button>}
+          title={t('leads.noLeads')}
+          description={t('leads.buildPipeline')}
+          action={<Button onClick={() => setShowModal(true)}>{t('leads.addLead')}</Button>}
         />
       ) : view === 'pipeline' ? (
         pipelineView
@@ -280,36 +282,36 @@ export default function LeadsPage() {
       )}
 
       {/* Add/Edit Lead Modal */}
-      <Modal isOpen={showModal} onClose={() => { setShowModal(false); setEditingItem(null); resetForm(); }} title={editingItem ? 'Edit Lead' : 'Add Lead'} size="lg">
+      <Modal isOpen={showModal} onClose={() => { setShowModal(false); setEditingItem(null); resetForm(); }} title={editingItem ? t('leads.editLead') : t('leads.addLead')} size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Contact Name" value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} required />
-            <Input label="Company Name" value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
+            <Input label={t('leads.contactNameLabel')} value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} required />
+            <Input label={t('leads.companyNameLabel')} value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            <Input label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <Input label={t('leads.emailLabel')} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <Input label={t('leads.phoneLabel')} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Select
-              label="Source"
+              label={t('leads.sourceLabel')}
               options={[
-                { value: 'website', label: 'Website' },
-                { value: 'referral', label: 'Referral' },
-                { value: 'cold-call', label: 'Cold Call' },
-                { value: 'trade-show', label: 'Trade Show' },
-                { value: 'social-media', label: 'Social Media' },
-                { value: 'other', label: 'Other' },
+                { value: 'website', label: t('leads.website') },
+                { value: 'referral', label: t('leads.referral') },
+                { value: 'cold-call', label: t('leads.coldCall') },
+                { value: 'trade-show', label: t('leads.tradeShow') },
+                { value: 'social-media', label: t('leads.socialMedia') },
+                { value: 'other', label: t('leads.otherSource') },
               ]}
               value={form.source}
               onChange={(e) => setForm({ ...form, source: e.target.value })}
             />
-            <Input label="Estimated Value (₹)" type="number" value={form.estimatedValue} onChange={(e) => setForm({ ...form, estimatedValue: e.target.value })} />
+            <Input label={t('leads.estimatedValue')} type="number" value={form.estimatedValue} onChange={(e) => setForm({ ...form, estimatedValue: e.target.value })} />
           </div>
-          <Input label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Additional notes..." />
+          <Input label={t('leads.additionalNotes')} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder={t('leads.additionalNotes')} />
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="secondary" type="button" onClick={() => { setShowModal(false); setEditingItem(null); resetForm(); }}>Cancel</Button>
-            <Button type="submit" loading={createMutation.isPending || updateMutation.isPending}>{editingItem ? 'Update' : 'Add Lead'}</Button>
+            <Button variant="secondary" type="button" onClick={() => { setShowModal(false); setEditingItem(null); resetForm(); }}>{t('common.cancel')}</Button>
+            <Button type="submit" loading={createMutation.isPending || updateMutation.isPending}>{editingItem ? t('common.update') : t('leads.addLead')}</Button>
           </div>
         </form>
       </Modal>

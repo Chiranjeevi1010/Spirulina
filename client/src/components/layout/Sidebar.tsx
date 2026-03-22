@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Waves, Droplets, Scissors, Factory,
   FlaskConical, Calculator, Receipt, Users, UserPlus,
@@ -21,85 +22,86 @@ interface NavSection {
   items: NavItem[];
 }
 
-const navSections: NavSection[] = [
-  {
-    title: '',
-    items: [
-      { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
-    ],
-  },
-  {
-    title: 'Pond Management',
-    items: [
-      { label: 'All Ponds', path: '/ponds', icon: <Waves size={20} />, resource: 'ponds' },
-      { label: 'Water Parameters', path: '/water-parameters', icon: <Droplets size={20} />, resource: 'water_params' },
-    ],
-  },
-  {
-    title: 'Harvest & Production',
-    items: [
-      { label: 'Daily Harvest', path: '/harvest', icon: <Scissors size={20} />, resource: 'harvest' },
-      { label: 'Production', path: '/production', icon: <Factory size={20} />, resource: 'harvest' },
-    ],
-  },
-  {
-    title: 'Chemicals',
-    items: [
-      { label: 'Inventory', path: '/chemicals', icon: <FlaskConical size={20} />, resource: 'chemicals' },
-      { label: 'Dosing Calculator', path: '/chemicals/dosing', icon: <Calculator size={20} />, resource: 'chemicals' },
-    ],
-  },
-  {
-    title: 'Finance',
-    items: [
-      { label: 'Expenses', path: '/expenses', icon: <Receipt size={20} />, resource: 'expenses' },
-    ],
-  },
-  {
-    title: 'Sales & CRM',
-    items: [
-      { label: 'CRM Dashboard', path: '/crm', icon: <Target size={20} />, resource: 'leads' },
-      { label: 'Customers', path: '/customers', icon: <Users size={20} />, resource: 'customers' },
-      { label: 'Leads', path: '/leads', icon: <UserPlus size={20} />, resource: 'leads' },
-      { label: 'Extracted Leads', path: '/crm/extracted-leads', icon: <Search size={20} />, resource: 'leads' },
-      { label: 'Email Outreach', path: '/crm/email', icon: <Mail size={20} />, resource: 'leads' },
-      { label: 'Call Tracker', path: '/crm/call-tracker', icon: <Phone size={20} />, resource: 'leads' },
-      { label: 'Orders', path: '/orders', icon: <ShoppingCart size={20} />, resource: 'orders' },
-    ],
-  },
-  {
-    title: 'Inventory',
-    items: [
-      { label: 'Stock Overview', path: '/inventory', icon: <Package size={20} />, resource: 'inventory' },
-      { label: 'Batches', path: '/batches', icon: <Boxes size={20} />, resource: 'inventory' },
-    ],
-  },
-  {
-    title: 'Marketing',
-    items: [
-      { label: 'Demo Farms', path: '/marketing', icon: <Landmark size={20} />, resource: 'marketing' },
-      { label: 'Testimonials', path: '/marketing/testimonials', icon: <MessageSquareQuote size={20} />, resource: 'marketing' },
-    ],
-  },
-  {
-    title: 'AI & Reports',
-    items: [
-      { label: 'AI Assistant', path: '/ai-assistant', icon: <Bot size={20} />, resource: 'ai' },
-      { label: 'Reports', path: '/reports', icon: <BarChart3 size={20} />, resource: 'reports' },
-    ],
-  },
-  {
-    title: 'System',
-    items: [
-      { label: 'Settings', path: '/settings', icon: <Settings size={20} />, resource: 'settings' },
-    ],
-  },
-];
-
 export function Sidebar() {
+  const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const { sidebarOpen, setSidebarOpen, sidebarCollapsed } = useUIStore();
   const permissions = (user?.role?.permissions ?? {}) as Record<string, string[]>;
+
+  const navSections: NavSection[] = [
+    {
+      title: '',
+      items: [
+        { label: t('sidebar.items.dashboard'), path: '/dashboard', icon: <LayoutDashboard size={20} /> },
+      ],
+    },
+    {
+      title: t('sidebar.sections.pondManagement'),
+      items: [
+        { label: t('sidebar.items.allPonds'), path: '/ponds', icon: <Waves size={20} />, resource: 'ponds' },
+        { label: t('sidebar.items.waterParameters'), path: '/water-parameters', icon: <Droplets size={20} />, resource: 'water_params' },
+      ],
+    },
+    {
+      title: t('sidebar.sections.harvestProduction'),
+      items: [
+        { label: t('sidebar.items.dailyHarvest'), path: '/harvest', icon: <Scissors size={20} />, resource: 'harvest' },
+        { label: t('sidebar.items.production'), path: '/production', icon: <Factory size={20} />, resource: 'harvest' },
+      ],
+    },
+    {
+      title: t('sidebar.sections.chemicals'),
+      items: [
+        { label: t('sidebar.items.chemInventory'), path: '/chemicals', icon: <FlaskConical size={20} />, resource: 'chemicals' },
+        { label: t('sidebar.items.dosingCalculator'), path: '/chemicals/dosing', icon: <Calculator size={20} />, resource: 'chemicals' },
+      ],
+    },
+    {
+      title: t('sidebar.sections.finance'),
+      items: [
+        { label: t('sidebar.items.expenses'), path: '/expenses', icon: <Receipt size={20} />, resource: 'expenses' },
+      ],
+    },
+    {
+      title: t('sidebar.sections.salesCrm'),
+      items: [
+        { label: t('sidebar.items.crmDashboard'), path: '/crm', icon: <Target size={20} />, resource: 'leads' },
+        { label: t('sidebar.items.customers'), path: '/customers', icon: <Users size={20} />, resource: 'customers' },
+        { label: t('sidebar.items.leads'), path: '/leads', icon: <UserPlus size={20} />, resource: 'leads' },
+        { label: t('sidebar.items.extractedLeads'), path: '/crm/extracted-leads', icon: <Search size={20} />, resource: 'leads' },
+        { label: t('sidebar.items.emailOutreach'), path: '/crm/email', icon: <Mail size={20} />, resource: 'leads' },
+        { label: t('sidebar.items.callTracker'), path: '/crm/call-tracker', icon: <Phone size={20} />, resource: 'leads' },
+        { label: t('sidebar.items.orders'), path: '/orders', icon: <ShoppingCart size={20} />, resource: 'orders' },
+      ],
+    },
+    {
+      title: t('sidebar.sections.inventory'),
+      items: [
+        { label: t('sidebar.items.stockOverview'), path: '/inventory', icon: <Package size={20} />, resource: 'inventory' },
+        { label: t('sidebar.items.batches'), path: '/batches', icon: <Boxes size={20} />, resource: 'inventory' },
+      ],
+    },
+    {
+      title: t('sidebar.sections.marketing'),
+      items: [
+        { label: t('sidebar.items.demoFarms'), path: '/marketing', icon: <Landmark size={20} />, resource: 'marketing' },
+        { label: t('sidebar.items.testimonials'), path: '/marketing/testimonials', icon: <MessageSquareQuote size={20} />, resource: 'marketing' },
+      ],
+    },
+    {
+      title: t('sidebar.sections.aiReports'),
+      items: [
+        { label: t('sidebar.items.aiAssistant'), path: '/ai-assistant', icon: <Bot size={20} />, resource: 'ai' },
+        { label: t('sidebar.items.reports'), path: '/reports', icon: <BarChart3 size={20} />, resource: 'reports' },
+      ],
+    },
+    {
+      title: t('sidebar.sections.system'),
+      items: [
+        { label: t('sidebar.items.settings'), path: '/settings', icon: <Settings size={20} />, resource: 'settings' },
+      ],
+    },
+  ];
 
   const hasAccess = (resource?: string) => {
     if (!resource) return true;
@@ -115,7 +117,7 @@ export function Sidebar() {
             <Waves size={18} className="text-white" />
           </div>
           {!sidebarCollapsed && (
-            <span className="text-lg font-bold text-gray-900">Spirulina ERP</span>
+            <span className="text-lg font-bold text-gray-900">{t('login.title')}</span>
           )}
         </div>
         <button
